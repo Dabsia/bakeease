@@ -11,7 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
-import { Switch } from "../../components/ui/switch";
 import { Card, CardContent } from "../../components/ui/card";
 import {
   Dialog,
@@ -38,6 +37,7 @@ const emptyProduct = {
   category: "classic",
   image_url: "",
   featured: false,
+  loafSize: "mini",
   in_stock: true,
   ingredients: "",
   combo_items: [],
@@ -119,6 +119,7 @@ export default function AdminProducts() {
       price: product.price || "",
       original_price: product.original_price || "",
       category: product.category || "classic",
+      loafSize: product.loafSize || "mini",
       image_url: product.image_url || "",
       featured: product.featured || false,
       in_stock: product.in_stock !== false,
@@ -278,7 +279,7 @@ export default function AdminProducts() {
                 className="mt-1"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <div>
                 <Label className="font-body text-sm">Price (€) *</Label>
                 <Input
@@ -287,18 +288,6 @@ export default function AdminProducts() {
                   value={form.price}
                   onChange={(e) => setForm({ ...form, price: e.target.value })}
                   required
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label className="font-body text-sm">Original Price (€)</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={form.original_price}
-                  onChange={(e) =>
-                    setForm({ ...form, original_price: e.target.value })
-                  }
                   className="mt-1"
                 />
               </div>
@@ -318,6 +307,23 @@ export default function AdminProducts() {
                   <SelectItem value="chocolatey">Chocolatey</SelectItem>
                   <SelectItem value="nutty">Nutty</SelectItem>
                   <SelectItem value="combo">Combo / Bundle</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="font-body text-sm">Bread Loaf Size</Label>
+              <Select
+                value={form.loafSize}
+                onValueChange={(v) => setForm({ ...form, loafSize: v })}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="mini">Mini</SelectItem>
+                  <SelectItem value="midi">Midi</SelectItem>
+                  <SelectItem value="regular">Regular</SelectItem>
+                  <SelectItem value="maxi">Maxi</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -368,22 +374,7 @@ export default function AdminProducts() {
                 className="mt-1"
               />
             </div>
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={form.featured}
-                  onCheckedChange={(v) => setForm({ ...form, featured: v })}
-                />
-                <Label className="font-body text-sm">Featured</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={form.in_stock}
-                  onCheckedChange={(v) => setForm({ ...form, in_stock: v })}
-                />
-                <Label className="font-body text-sm">In Stock</Label>
-              </div>
-            </div>
+
             <Button
               type="submit"
               className="w-full bg-foreground text-background hover:opacity-90 font-body font-semibold"
