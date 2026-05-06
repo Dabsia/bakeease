@@ -31,12 +31,6 @@ export default function AdminLayout() {
           </Link>
           <h1 className="font-heading text-lg font-bold">GourmetTwist Admin</h1>
         </div>
-        <Link
-          to="/"
-          className="font-body text-xs text-background/60 hover:text-background transition-colors"
-        >
-          View Store →
-        </Link>
       </header>
 
       <div className="flex">

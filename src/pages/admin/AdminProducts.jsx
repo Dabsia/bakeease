@@ -26,88 +26,217 @@ import {
   Loader2,
   Upload,
   AlertTriangle,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "../../lib/AuthContext";
+
+const API_URL = "http://localhost:3000/api/v1";
 
 const emptyProduct = {
   name: "",
   description: "",
   price: "",
-  original_price: "",
-  category: "classic",
-  image_url: "",
-  featured: false,
+  category: "",
   loafSize: "mini",
-  in_stock: true,
   ingredients: "",
   combo_items: [],
+  imageFile: null,
+  imagePreview: "",
 };
 
 export default function AdminProducts() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyProduct);
   const [uploading, setUploading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
-  // TODO: Replace with your own products fetching logic
-  const { data: products = [], isLoading } = useQuery({
+  // Fetch products
+  const {
+    data: productsResponse = [],
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["admin-products"],
     queryFn: async () => {
-      // Replace this with your actual API call
-      // Example: return await yourApi.getProducts({ sort: "-created_date", limit: 100 });
+      const token = localStorage.getItem("auth_token");
+      const response = await fetch(`${API_URL}/products`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      // For now, return empty array
-      return [];
+      if (response.status === 401) {
+        toast.error("Session expired. Please login again.");
+        window.location.href = "/auth";
+        throw new Error("Unauthorized");
+      }
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch products");
+      }
+
+      const data = await response.json();
+      return data.data || [];
     },
   });
 
-  // TODO: Replace with your own product creation logic
+  const products = productsResponse;
+
+  // Create product mutation
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      // Replace this with your actual API call
-      // Example: return await yourApi.createProduct(data);
-      return data;
+      const token = localStorage.getItem("auth_token");
+
+      // Create FormData for multipart/form-data
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("description", data.description);
+      formData.append("price", data.price);
+      formData.append("category", data.category);
+      formData.append("loafSize", data.loafSize);
+      formData.append("ingredients", data.ingredients);
+      if (data.combo_items && data.combo_items.length > 0) {
+        formData.append("combo_items", JSON.stringify(data.combo_items));
+      }
+
+      // Append image file if exists
+      if (data.imageFile) {
+        formData.append("image", data.imageFile);
+      }
+
+      const response = await fetch(`${API_URL}/products`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData, // Don't set Content-Type, let browser set it with boundary
+      });
+
+      if (response.status === 401) {
+        toast.error("Session expired. Please login again.");
+        window.location.href = "/auth";
+        throw new Error("Unauthorized");
+      }
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to create product");
+      }
+
+      const result = await response.json();
+      return result.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       setDialogOpen(false);
-      toast.success("Product created");
+      resetForm();
+      toast.success("Product created successfully!");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to create product");
     },
   });
 
-  // TODO: Replace with your own product update logic
+  // Update product mutation
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }) => {
-      // Replace this with your actual API call
-      // Example: return await yourApi.updateProduct(id, data);
-      return { id, ...data };
+      const token = localStorage.getItem("auth_token");
+
+      // Create FormData for multipart/form-data
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("description", data.description);
+      formData.append("price", data.price);
+      formData.append("category", data.category);
+      formData.append("loafSize", data.loafSize);
+      formData.append("ingredients", data.ingredients);
+      if (data.combo_items && data.combo_items.length > 0) {
+        formData.append("combo_items", JSON.stringify(data.combo_items));
+      }
+
+      // Append new image file if exists
+      if (data.imageFile) {
+        formData.append("image", data.imageFile);
+      }
+
+      const response = await fetch(`${API_URL}/products/${id}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (response.status === 401) {
+        toast.error("Session expired. Please login again.");
+        window.location.href = "/auth";
+        throw new Error("Unauthorized");
+      }
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to update product");
+      }
+
+      const result = await response.json();
+      return result.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       setDialogOpen(false);
-      toast.success("Product updated");
+      resetForm();
+      toast.success("Product updated successfully!");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to update product");
     },
   });
 
-  // TODO: Replace with your own product deletion logic
+  // Delete product mutation
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
-      // Replace this with your actual API call
-      // Example: return await yourApi.deleteProduct(id);
+      const token = localStorage.getItem("auth_token");
+      const response = await fetch(`${API_URL}/products/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 401) {
+        toast.error("Session expired. Please login again.");
+        window.location.href = "/auth";
+        throw new Error("Unauthorized");
+      }
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to delete product");
+      }
+
       return id;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
       setDeleteTarget(null);
-      toast.success("Product deleted");
+      toast.success("Product deleted successfully!");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to delete product");
     },
   });
 
-  const openCreate = () => {
-    setEditing(null);
+  const resetForm = () => {
     setForm(emptyProduct);
+    setEditing(null);
+  };
+
+  const openCreate = () => {
+    resetForm();
     setDialogOpen(true);
   };
 
@@ -117,59 +246,144 @@ export default function AdminProducts() {
       name: product.name || "",
       description: product.description || "",
       price: product.price || "",
-      original_price: product.original_price || "",
-      category: product.category || "classic",
+      category: product.category || "",
       loafSize: product.loafSize || "mini",
-      image_url: product.image_url || "",
-      featured: product.featured || false,
-      in_stock: product.in_stock !== false,
       ingredients: product.ingredients || "",
       combo_items: product.combo_items || [],
+      imageFile: null,
+      imagePreview: product.image?.url || "",
     });
     setDialogOpen(true);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!form.image_url) {
-      toast.error("Please upload an image before saving.");
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
       return;
     }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size should be less than 5MB");
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      // Create preview only, actual upload happens in mutation
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setForm((prev) => ({
+          ...prev,
+          imagePreview: reader.result,
+          imageFile: file,
+        }));
+        setUploading(false);
+      };
+      reader.readAsDataURL(file);
+
+      toast.success("Image selected successfully");
+    } catch (error) {
+      console.error("Error handling image:", error);
+      toast.error("Failed to process image");
+      setUploading(false);
+    }
+  };
+
+  const removeImage = () => {
+    setForm((prev) => ({ ...prev, imageFile: null, imagePreview: "" }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!form.name) {
+      toast.error("Please enter product name");
+      return;
+    }
+
+    if (!form.price) {
+      toast.error("Please enter product price");
+      return;
+    }
+
+    if (!form.category) {
+      toast.error("Please select a category");
+      return;
+    }
+
+    if (!form.imagePreview && !editing) {
+      toast.error("Please upload an image");
+      return;
+    }
+
+    // For editing, if no new image is selected, we don't send an image file
+    // The backend should keep the existing image
     const data = {
-      ...form,
-      price: parseFloat(form.price) || 0,
-      original_price: form.original_price
-        ? parseFloat(form.original_price)
-        : undefined,
+      name: form.name,
+      description: form.description,
+      price: parseFloat(form.price),
+      category: form.category,
+      loafSize: form.loafSize,
+      ingredients: form.ingredients,
+      combo_items: form.combo_items,
+      imageFile: form.imageFile, // Will be undefined if no new image selected
     };
+
     if (editing) {
-      updateMutation.mutate({ id: editing.id, data });
+      updateMutation.mutate({ id: editing._id, data });
     } else {
       createMutation.mutate(data);
     }
   };
 
-  // TODO: Replace with your own image upload logic
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setUploading(true);
+  const categoryOptions = [
+    "Classic",
+    "Fruity",
+    "Chocolatey",
+    "Nutty",
+    "Combo",
+    "Rice",
+    "Wheat",
+    "Sourdough",
+  ];
 
-    // Replace this with your actual image upload API call
-    // Example: const { file_url } = await yourApi.uploadImage(file);
-    // setForm((prev) => ({ ...prev, image_url: file_url }));
-
-    // Simulate upload delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    setUploading(false);
-    toast.error(
-      "Image upload not implemented. Please implement your own upload logic."
-    );
-  };
+  const loafSizeOptions = ["mini", "midi", "regular", "maxi"];
 
   const isSaving = createMutation.isPending || updateMutation.isPending;
   const isDisabled = uploading || isSaving;
+
+  // Check if user is admin
+  if (user?.role !== "admin") {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Card>
+          <CardContent className="py-12 text-center">
+            <p className="font-body text-muted-foreground">
+              You don't have permission to access this page.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="py-12 text-center">
+          <p className="font-body text-destructive">
+            Error loading products. Please try again.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div>
@@ -200,18 +414,18 @@ export default function AdminProducts() {
       ) : (
         <div className="grid gap-3">
           {products.map((product) => (
-            <Card key={product.id}>
+            <Card key={product._id}>
               <CardContent className="flex items-center gap-4 py-3 px-4">
                 <div className="w-14 h-14 bg-muted rounded-lg overflow-hidden flex-shrink-0">
-                  {product.image_url ? (
+                  {product.image?.url ? (
                     <img
-                      src={product.image_url}
-                      alt=""
+                      src={product.image.url}
+                      alt={product.name}
                       className="w-full h-full object-cover"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-                      —
+                      No img
                     </div>
                   )}
                 </div>
@@ -220,15 +434,11 @@ export default function AdminProducts() {
                     {product.name}
                   </h3>
                   <p className="font-body text-xs text-muted-foreground capitalize">
-                    {product.category} • €{product.price?.toFixed(2)}
+                    {product.category} • €{product.price?.toFixed(2)} •{" "}
+                    {product.loafSize}
                   </p>
                 </div>
                 <div className="flex items-center gap-1">
-                  {product.featured && (
-                    <span className="font-body text-xs bg-primary/20 text-primary-foreground px-2 py-0.5 rounded-full mr-2">
-                      Featured
-                    </span>
-                  )}
                   <Button
                     variant="ghost"
                     size="icon"
@@ -266,8 +476,10 @@ export default function AdminProducts() {
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 required
                 className="mt-1"
+                disabled={isDisabled}
               />
             </div>
+
             <div>
               <Label className="font-body text-sm">Description</Label>
               <Textarea
@@ -277,92 +489,63 @@ export default function AdminProducts() {
                 }
                 rows={3}
                 className="mt-1"
+                disabled={isDisabled}
               />
             </div>
-            <div className="grid grid-cols-1 gap-4">
-              <div>
-                <Label className="font-body text-sm">Price (€) *</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={form.price}
-                  onChange={(e) => setForm({ ...form, price: e.target.value })}
-                  required
-                  className="mt-1"
-                />
-              </div>
-            </div>
+
             <div>
-              <Label className="font-body text-sm">Category</Label>
+              <Label className="font-body text-sm">Price (€) *</Label>
+              <Input
+                type="number"
+                step="0.01"
+                value={form.price}
+                onChange={(e) => setForm({ ...form, price: e.target.value })}
+                required
+                className="mt-1"
+                disabled={isDisabled}
+              />
+            </div>
+
+            <div>
+              <Label className="font-body text-sm">Category *</Label>
               <Select
                 value={form.category}
                 onValueChange={(v) => setForm({ ...form, category: v })}
+                disabled={isDisabled}
               >
                 <SelectTrigger className="mt-1">
-                  <SelectValue />
+                  <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="classic">Classic</SelectItem>
-                  <SelectItem value="fruity">Fruity</SelectItem>
-                  <SelectItem value="chocolatey">Chocolatey</SelectItem>
-                  <SelectItem value="nutty">Nutty</SelectItem>
-                  <SelectItem value="combo">Combo / Bundle</SelectItem>
+                  {categoryOptions.map((cat) => (
+                    <SelectItem key={cat} value={cat.toLowerCase()}>
+                      {cat}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
+
             <div>
-              <Label className="font-body text-sm">Bread Loaf Size</Label>
+              <Label className="font-body text-sm">Loaf Size</Label>
               <Select
                 value={form.loafSize}
                 onValueChange={(v) => setForm({ ...form, loafSize: v })}
+                disabled={isDisabled}
               >
                 <SelectTrigger className="mt-1">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="mini">Mini</SelectItem>
-                  <SelectItem value="midi">Midi</SelectItem>
-                  <SelectItem value="regular">Regular</SelectItem>
-                  <SelectItem value="maxi">Maxi</SelectItem>
+                  {loafSizeOptions.map((size) => (
+                    <SelectItem key={size} value={size}>
+                      {size.charAt(0).toUpperCase() + size.slice(1)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label className="font-body text-sm">Image *</Label>
-              <div className="mt-1 flex items-center gap-3">
-                {form.image_url && !uploading && (
-                  <img
-                    src={form.image_url}
-                    alt=""
-                    className="w-16 h-16 rounded-lg object-cover"
-                  />
-                )}
-                <label
-                  className={`flex items-center gap-2 px-4 py-2 border border-border rounded-lg cursor-pointer hover:bg-muted transition-colors font-body text-sm ${
-                    uploading ? "opacity-60 pointer-events-none" : ""
-                  }`}
-                >
-                  {uploading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Upload className="w-4 h-4" />
-                  )}
-                  {uploading ? "Uploading..." : "Upload Image"}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleImageUpload}
-                    disabled={uploading}
-                  />
-                </label>
-              </div>
-              {!form.image_url && !uploading && (
-                <p className="font-body text-xs text-destructive mt-1">
-                  Image is required
-                </p>
-              )}
-            </div>
+
             <div>
               <Label className="font-body text-sm">Ingredients</Label>
               <Textarea
@@ -372,7 +555,66 @@ export default function AdminProducts() {
                 }
                 rows={2}
                 className="mt-1"
+                placeholder="Separate ingredients with commas"
+                disabled={isDisabled}
               />
+            </div>
+
+            <div>
+              <Label className="font-body text-sm">
+                Product Image {!editing && "*"}
+              </Label>
+              <div className="mt-1">
+                {form.imagePreview ? (
+                  <div className="relative inline-block">
+                    <img
+                      src={form.imagePreview}
+                      alt="Preview"
+                      className="w-24 h-24 rounded-lg object-cover border border-border"
+                    />
+                    <button
+                      type="button"
+                      onClick={removeImage}
+                      className="absolute -top-2 -right-2 p-1 bg-destructive text-white rounded-full hover:bg-destructive/90 transition-colors"
+                      disabled={isDisabled}
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <label
+                    className={`flex items-center gap-2 px-4 py-2 border border-border rounded-lg cursor-pointer hover:bg-muted transition-colors font-body text-sm ${
+                      uploading || isDisabled
+                        ? "opacity-60 pointer-events-none"
+                        : ""
+                    }`}
+                  >
+                    {uploading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4" />
+                    )}
+                    {uploading ? "Processing..." : "Choose Image"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageUpload}
+                      disabled={uploading || isDisabled}
+                    />
+                  </label>
+                )}
+              </div>
+              {!form.imagePreview && !editing && (
+                <p className="font-body text-xs text-destructive mt-1">
+                  Image is required for new products
+                </p>
+              )}
+              {editing && !form.imagePreview && (
+                <p className="font-body text-xs text-muted-foreground mt-1">
+                  Current image will be kept. Choose a new image to replace it.
+                </p>
+              )}
             </div>
 
             <Button
@@ -380,13 +622,16 @@ export default function AdminProducts() {
               className="w-full bg-foreground text-background hover:opacity-90 font-body font-semibold"
               disabled={isDisabled}
             >
-              {uploading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-              {isSaving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+              {(isSaving || uploading) && (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              )}
               {uploading
-                ? "Waiting for image..."
-                : editing
-                ? "Update Product"
-                : "Create Product"}
+                ? "Processing Image..."
+                : isSaving
+                  ? "Saving..."
+                  : editing
+                    ? "Update Product"
+                    : "Create Product"}
             </Button>
           </form>
         </DialogContent>
@@ -413,12 +658,13 @@ export default function AdminProducts() {
               variant="outline"
               className="flex-1 font-body"
               onClick={() => setDeleteTarget(null)}
+              disabled={deleteMutation.isPending}
             >
               Cancel
             </Button>
             <Button
               className="flex-1 bg-destructive text-white hover:bg-destructive/90 font-body"
-              onClick={() => deleteMutation.mutate(deleteTarget.id)}
+              onClick={() => deleteMutation.mutate(deleteTarget._id)}
               disabled={deleteMutation.isPending}
             >
               {deleteMutation.isPending && (

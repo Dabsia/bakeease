@@ -5,6 +5,7 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Loader2, User, LogOut, Pencil, Check, X } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../lib/AuthContext";
 
@@ -12,6 +13,7 @@ export default function UserProfile() {
   const [editingName, setEditingName] = useState(false);
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
+  const navigate = useNavigate();
 
   const { logout } = useAuth();
   const user = JSON.parse(localStorage.getItem("user"));
@@ -27,7 +29,11 @@ export default function UserProfile() {
 
   const handleSignOut = () => {
     logout();
-    window.location.href = "/";
+    navigate("/");
+  };
+
+  const navigateToAdmin = () => {
+    navigate("/admin");
   };
 
   return (
@@ -121,6 +127,18 @@ export default function UserProfile() {
                 {user?.email}
               </p>
             </div>
+            {user?.role === "admin" && (
+              <Button
+                size="icon"
+                className="w-fit px-2"
+                variant=""
+                onClick={() => {
+                  navigateToAdmin();
+                }}
+              >
+                Admin Dashboard
+              </Button>
+            )}
           </CardContent>
         </Card>
       </div>

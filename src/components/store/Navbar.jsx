@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { ShoppingCart, Menu, X, UserCircle } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import { Button } from "../ui/button";
-import { useAuth } from "../../lib/AuthContext";
 
 const navLinks = [
   { label: "All Breads", path: "/shop" },
@@ -17,7 +16,6 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   const isLoggedIn = localStorage.getItem("auth_token") !== null;
-  console.log("Navbar - isLoggedIn:", isLoggedIn);
 
   const handleNavClick = (path) => {
     setMobileOpen(false);
