@@ -11,11 +11,11 @@ export default function ProductCard({ product }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <Link to={`/product/${product.id}`} className="group block">
+      <Link to={`/product/${product._id}`} className="group block">
         <div className="aspect-square bg-secondary rounded-2xl overflow-hidden mb-4">
-          {product.image_url && !imgError ? (
+          {product.image?.url && !imgError ? (
             <img
-              src={product.image_url}
+              src={product.image?.url}
               alt={product.name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               onError={() => setImgError(true)}

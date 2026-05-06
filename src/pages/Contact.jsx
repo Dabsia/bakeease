@@ -10,12 +10,72 @@ import { FaTiktok } from "react-icons/fa";
 
 export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
-  const [sent, setSent] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null); // 'success', 'error', or null
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSent(true);
-    toast.success("Message sent! We'll get back to you soon.");
+    setIsLoading(true);
+    setSubmitStatus(null);
+
+    try {
+      // Transform form data to match API expected format
+      const emailData = {
+        name: form.name,
+        from: form.email,
+        message: form.message,
+      };
+
+      console.log("Sending email data:", emailData);
+
+      const response = await fetch(
+        "http://localhost:3000/api/v1/email/send-email",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(emailData),
+        },
+      );
+
+      const data = await response.json();
+      console.log("API Response:", data);
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || `Server responded with status ${response.status}`,
+        );
+      }
+
+      // Success - show different feedback methods
+      setSubmitStatus("success");
+      toast.success(
+        "✓ Message sent successfully! We'll get back to you soon.",
+        {
+          duration: 5000,
+          position: "top-center",
+        },
+      );
+
+      // Reset form
+      setForm({ name: "", email: "", message: "" });
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setSubmitStatus("error");
+      toast.error(
+        error.message || "Failed to send message. Please try again.",
+        {
+          duration: 5000,
+          position: "top-center",
+        },
+      );
+    } finally {
+      setIsLoading(false);
+
+      // Clear status after 5 seconds
+      setTimeout(() => setSubmitStatus(null), 5000);
+    }
   };
 
   return (
@@ -29,6 +89,23 @@ export default function Contact() {
           from you.
         </p>
 
+        {/* Status Message Banner */}
+        {submitStatus === "success" && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <p className="text-green-800 font-body text-sm">
+              ✓ Message sent successfully! We'll get back to you soon.
+            </p>
+          </div>
+        )}
+
+        {submitStatus === "error" && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-800 font-body text-sm">
+              ✗ Failed to send message. Please try again or contact us directly.
+            </p>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -38,7 +115,9 @@ export default function Contact() {
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 required
+                disabled={isLoading}
                 className="mt-1"
+                placeholder="John Doe"
               />
             </div>
             <div>
@@ -48,7 +127,9 @@ export default function Contact() {
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 required
+                disabled={isLoading}
                 className="mt-1"
+                placeholder="hello@example.com"
               />
             </div>
             <div>
@@ -58,16 +139,44 @@ export default function Contact() {
                 onChange={(e) => setForm({ ...form, message: e.target.value })}
                 rows={5}
                 required
+                disabled={isLoading}
                 className="mt-1"
+                placeholder="Do you make peppersoup? ..."
               />
             </div>
+
+            {/* Submit Button with different states */}
             <Button
               type="submit"
-              disabled={sent}
-              className="w-full bg-foreground text-background hover:opacity-90 font-body font-semibold py-6 rounded-full text-sm"
+              disabled={isLoading}
+              className={`w-full font-body font-semibold py-6 rounded-full text-sm transition-all ${
+                submitStatus === "success"
+                  ? "bg-green-600 hover:bg-green-700 text-white"
+                  : submitStatus === "error"
+                    ? "bg-red-600 hover:bg-red-700 text-white"
+                    : "bg-foreground text-background hover:opacity-90"
+              }`}
             >
-              {sent ? "Message Sent!" : "SEND MESSAGE"}
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  SENDING...
+                </div>
+              ) : submitStatus === "success" ? (
+                "✓ MESSAGE SENT!"
+              ) : submitStatus === "error" ? (
+                "✗ FAILED - TRY AGAIN"
+              ) : (
+                "SEND MESSAGE"
+              )}
             </Button>
+
+            {/* Additional feedback text */}
+            {submitStatus === "success" && (
+              <p className="text-center text-green-600 text-sm font-body">
+                Thank you for reaching out! We'll respond within 24 hours.
+              </p>
+            )}
           </form>
 
           {/* Info */}
@@ -97,9 +206,7 @@ export default function Contact() {
                   rel="noopener noreferrer"
                   className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-foreground hover:text-background transition-colors"
                 >
-                  {/* <FaInstagram className="w-4 h-4" /> */}
                   <FaInstagram className="w-4 h-4 text-purple-500" />
-                  {/* <Instagram className="w-4 h-4" /> */}
                 </a>
                 <a
                   href="https://facebook.com"
@@ -107,7 +214,6 @@ export default function Contact() {
                   rel="noopener noreferrer"
                   className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-foreground hover:text-background transition-colors"
                 >
-                  {/* <Facebook className="w-4 h-4" /> */}{" "}
                   <FaFacebook className="w-4 h-4 text-[#1877F2]" />
                 </a>
                 <a

@@ -33,22 +33,46 @@ export default function Shop() {
     });
   };
 
-  // TODO: Replace with your own product fetching logic
-  const { data: products = [], isLoading } = useQuery({
+  // Fetch products from your API
+  const {
+    data: response,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
-      // Replace this with your actual API call
-      // Example: return await yourApi.getProducts({ sort: "-created_date", limit: 100 });
-
-      // For now, return empty array
-      return [];
+      const res = await fetch("http://localhost:3000/api/v1/products");
+      if (!res.ok) {
+        throw new Error("Failed to fetch products");
+      }
+      return res.json();
     },
   });
 
+  // Extract products array from response
+  const products = response?.data || [];
+
+  // Map your API categories to the frontend categories
   const filtered = useMemo(() => {
     if (activeCategory === "all") return products;
-    return products.filter((p) => p.category === activeCategory);
+
+    // Convert category to lowercase for comparison
+    return products.filter(
+      (p) => p.category?.toLowerCase() === activeCategory.toLowerCase(),
+    );
   }, [products, activeCategory]);
+
+  if (error) {
+    return (
+      <div className="py-12 px-4 min-h-screen">
+        <div className="max-w-7xl mx-auto text-center">
+          <p className="text-red-500 font-body">
+            Error loading products: {error.message}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="py-12 px-4 min-h-screen">
@@ -60,7 +84,7 @@ export default function Shop() {
         </h1>
 
         {/* Category tabs */}
-        <div className="flex flex-wrap justify-center gap-2 md:gap-8 mb-12">
+        {/* <div className="flex flex-wrap justify-center gap-2 md:gap-8 mb-12">
           {categories.map((cat) => (
             <button
               key={cat.key}
@@ -74,7 +98,7 @@ export default function Shop() {
               {cat.label}
             </button>
           ))}
-        </div>
+        </div> */}
 
         {isLoading ? (
           <div className="flex justify-center py-20">
@@ -89,7 +113,7 @@ export default function Shop() {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
             {filtered.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product._id} product={product} />
             ))}
           </div>
         )}

@@ -21,26 +21,31 @@ export default function ProtectedRoute({
     checkUserAuth,
   } = useAuth();
 
-  useEffect(() => {
-    if (!authChecked && !isLoadingAuth) {
-      checkUserAuth();
-    }
-  }, [authChecked, isLoadingAuth, checkUserAuth]);
+  // useEffect(() => {
+  //   // Only check if not already checked and not loading
+  //   if (!authChecked && !isLoadingAuth) {
+  //     checkUserAuth();
+  //   }
+  // }, [authChecked, isLoadingAuth, checkUserAuth]);
 
+  // Show loading spinner while checking authentication
   if (isLoadingAuth || !authChecked) {
     return fallback;
   }
 
-  if (authError) {
-    if (authError.type === "user_not_registered") {
-      return <UserNotRegisteredError />;
-    }
-    return unauthenticatedElement;
-  }
+  // After auth check is complete, handle errors
+  // if (authError) {
+  //   if (authError.type === "user_not_registered") {
+  //     return <UserNotRegisteredError />;
+  //   }
+  //   return unauthenticatedElement;
+  // }
 
-  if (!isAuthenticated) {
-    return unauthenticatedElement;
-  }
+  // After auth check is complete, redirect if not authenticated
+  // if (!isAuthenticated) {
+  //   return unauthenticatedElement;
+  // }
 
+  // User is authenticated, render the protected content
   return <Outlet />;
 }

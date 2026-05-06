@@ -6,37 +6,19 @@ import { Card, CardContent } from "../components/ui/card";
 import { Loader2, User, LogOut, Pencil, Check, X } from "lucide-react";
 import { toast } from "sonner";
 
+import { useAuth } from "../lib/AuthContext";
+
 export default function UserProfile() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [editingName, setEditingName] = useState(false);
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    // TODO: Replace with your own user fetching logic
-    const fetchUser = async () => {
-      try {
-        // Replace this with your actual API call
-        // Example: const user = await yourAuth.getCurrentUser();
-        // setUser(user);
-        // setName(user.full_name || "");
-
-        // For now, just set loading to false
-        setLoading(false);
-      } catch (error) {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
-  }, []);
+  const { logout } = useAuth();
+  const user = JSON.parse(localStorage.getItem("user"));
 
   const handleSaveName = async () => {
     setSaving(true);
 
-    // TODO: Replace with your own user update logic
-    // Example: await yourAuth.updateUser({ full_name: name });
     setUser((prev) => ({ ...prev, full_name: name }));
     setEditingName(false);
     toast.success("Name updated");
@@ -44,18 +26,9 @@ export default function UserProfile() {
   };
 
   const handleSignOut = () => {
-    // TODO: Replace with your own logout logic
-    // Example: yourAuth.logout();
+    logout();
     window.location.href = "/";
   };
-
-  if (loading) {
-    return (
-      <div className="py-32 flex justify-center">
-        <Loader2 className="w-6 h-6 animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <div className="py-12 px-4 min-h-screen">
@@ -82,7 +55,7 @@ export default function UserProfile() {
               </div>
               <div>
                 <p className="font-body font-semibold text-foreground">
-                  {user?.full_name || "No name set"}
+                  {user?.name || "No name set"}
                 </p>
                 <p className="font-body text-xs text-muted-foreground">
                   {user?.email}
@@ -129,19 +102,12 @@ export default function UserProfile() {
               ) : (
                 <div className="flex items-center justify-between mt-1">
                   <p className="font-body text-sm text-foreground">
-                    {user?.full_name || (
+                    {user?.name || (
                       <span className="text-muted-foreground italic">
                         Not set
                       </span>
                     )}
                   </p>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => setEditingName(true)}
-                  >
-                    <Pencil className="w-4 h-4 text-muted-foreground" />
-                  </Button>
                 </div>
               )}
             </div>

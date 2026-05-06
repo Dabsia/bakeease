@@ -1,12 +1,18 @@
 import { Toaster } from "./components/ui/toaster";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClientInstance } from "./lib/query-client";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 import PageNotFound from "./lib/PageNotFound";
 import { AuthProvider, useAuth } from "./lib/AuthContext";
 import UserNotRegisteredError from "./components/UserNotRegisteredError";
 import { CartProvider } from "./context/CartContext";
 import ScrollToTop from "./components/ScrollToTop";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import StoreLayout from "./components/store/StoreLayout";
 import Home from "./pages/Home";
@@ -26,11 +32,15 @@ import AuthScreen from "./pages/AuthScreen";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 
-const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } =
-    useAuth();
+// Unauthenticated fallback component
+const UnauthenticatedFallback = () => <Navigate to="/auth" replace />;
 
-  if (isLoadingPublicSettings || isLoadingAuth) {
+// Admin route wrapper component
+const AdminRoute = ({ children }) => {
+  const { isAuthenticated, isLoadingAuth, user, authChecked } = useAuth();
+
+  // Wait for auth to check
+  if (isLoadingAuth || !authChecked) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
@@ -38,39 +48,71 @@ const AuthenticatedApp = () => {
     );
   }
 
-  if (authError) {
-    if (authError.type === "user_not_registered") {
-      return <UserNotRegisteredError />;
-    } else if (authError.type === "auth_required") {
-      navigateToLogin();
-      return null;
-    }
+  if (!isAuthenticated) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  if (user?.role !== "admin") {
+    return <Navigate to="/shop" replace />;
+  }
+
+  return children;
+};
+
+const AuthenticatedApp = () => {
+  const { isLoadingPublicSettings, isLoadingAuth, authChecked } = useAuth();
+
+  // Show loading while checking auth or loading settings
+  if (isLoadingPublicSettings || isLoadingAuth || !authChecked) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+      </div>
+    );
   }
 
   return (
     <CartProvider>
       <ScrollToTop />
       <Routes>
-        {/* Store pages */}
-        <Route element={<StoreLayout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/orders" element={<OrderHistory />} />
-          <Route path="/profile" element={<UserProfile />} />
-        </Route>
+        {/* Public routes - no authentication required */}
         <Route path="/auth" element={<AuthScreen />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        {/* Admin pages */}
-        <Route element={<AdminLayout />}>
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/products" element={<AdminProducts />} />
-          <Route path="/admin/orders" element={<AdminOrders />} />
-          <Route path="/admin/profile" element={<AdminProfile />} />
+
+        {/* Protected store routes - require authentication */}
+        <Route
+          element={
+            <ProtectedRoute
+              unauthenticatedElement={<UnauthenticatedFallback />}
+            />
+          }
+        >
+          <Route element={<StoreLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/shop" element={<Shop />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/orders" element={<OrderHistory />} />
+            <Route path="/profile" element={<UserProfile />} />
+          </Route>
+        </Route>
+
+        {/* Admin routes - require admin role */}
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminLayout />
+            </AdminRoute>
+          }
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="products" element={<AdminProducts />} />
+          <Route path="orders" element={<AdminOrders />} />
+          <Route path="profile" element={<AdminProfile />} />
         </Route>
 
         <Route path="*" element={<PageNotFound />} />

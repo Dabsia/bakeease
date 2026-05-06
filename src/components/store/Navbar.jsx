@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ShoppingCart, Menu, X, UserCircle } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import { Button } from "../ui/button";
+import { useAuth } from "../../lib/AuthContext";
 
 const navLinks = [
   { label: "All Breads", path: "/shop" },
@@ -14,6 +15,9 @@ export default function Navbar() {
   const { itemCount } = useCart();
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
+
+  const isLoggedIn = localStorage.getItem("auth_token") !== null;
+  console.log("Navbar - isLoggedIn:", isLoggedIn);
 
   const handleNavClick = (path) => {
     setMobileOpen(false);
@@ -45,7 +49,11 @@ export default function Navbar() {
 
         <div className="flex items-center gap-2">
           {/* User profile icon */}
-          <Link to="/profile" className="hidden sm:block" title="My Profile">
+          <Link
+            to={isLoggedIn ? "/profile" : "/auth"}
+            className="hidden sm:block"
+            title="My Profile"
+          >
             <Button variant="ghost" size="icon" className="rounded-full">
               <UserCircle className="w-5 h-5" />
             </Button>
@@ -86,12 +94,21 @@ export default function Navbar() {
               {link.label}
             </button>
           ))}
-          <button
-            onClick={() => handleNavClick("/profile")}
-            className="block w-full text-left py-3 font-body font-medium text-sm text-muted-foreground"
-          >
-            My Profile
-          </button>
+          {isLoggedIn ? (
+            <button
+              onClick={() => handleNavClick("/profile")}
+              className="block w-full text-left py-3 font-body font-medium text-sm text-muted-foreground"
+            >
+              My Profile
+            </button>
+          ) : (
+            <button
+              onClick={() => handleNavClick("/auth")}
+              className="block w-full text-left py-3 font-body font-medium text-sm text-muted-foreground"
+            >
+              Login/Signup
+            </button>
+          )}
         </div>
       )}
     </header>
