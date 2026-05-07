@@ -7,6 +7,8 @@ import { Label } from "../components/ui/label";
 import { Loader2, Mail, ArrowLeft, CheckCircle2, Coffee } from "lucide-react";
 import { toast } from "sonner";
 
+const API_URL = "http://localhost:3000/api/v1";
+
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -21,15 +23,26 @@ export default function ForgotPassword() {
 
     setIsLoading(true);
 
-    // TODO: Replace with your actual API call
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const response = await fetch(`${API_URL}/auth/reset-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
 
-      // Mock successful response
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to send reset link");
+      }
+
+      // Success
       setIsSent(true);
-      toast.success("Reset link sent to your email!");
+      toast.success(data.message || "Reset link sent to your email!");
     } catch (error) {
+      console.error("Password reset error:", error);
       toast.error(error.message || "Failed to send reset link");
     } finally {
       setIsLoading(false);
@@ -146,6 +159,7 @@ export default function ForgotPassword() {
                     className="pl-10"
                     required
                     autoFocus
+                    disabled={isLoading}
                   />
                 </div>
               </div>
@@ -156,9 +170,13 @@ export default function ForgotPassword() {
                 className="w-full bg-foreground text-background hover:opacity-90 font-body font-semibold py-6 rounded-full text-sm transition-all"
               >
                 {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                ) : null}
-                Send Reset Link
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    SENDING...
+                  </>
+                ) : (
+                  "Send Reset Link"
+                )}
               </Button>
             </form>
 

@@ -359,7 +359,7 @@ export default function AuthScreen() {
                     type="button"
                     className="font-body text-xs text-primary hover:underline transition-all"
                     onClick={() => {
-                      toast.info("Password reset link sent to your email");
+                      navigate("/forgot-password");
                     }}
                   >
                     Forgot password?
