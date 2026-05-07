@@ -23,31 +23,23 @@ export const AuthProvider = ({ children }) => {
       setIsLoadingAuth(true);
       setAuthError(null);
 
+      // Get token and user from localStorage
       const token = localStorage.getItem("auth_token");
+      const storedUser = localStorage.getItem("user");
 
-      if (!token) {
-        setUser(null);
-        setIsAuthenticated(false);
-        setAuthChecked(true);
-        return;
-      }
+      console.log("Checking auth - token exists:", !!token);
+      console.log("Checking auth - stored user:", storedUser);
 
-      const data = await response.json();
-
-      if (response.ok && data.data) {
-        setUser(data.data);
+      if (token && storedUser) {
+        const userData = JSON.parse(storedUser);
+        setUser(userData);
         setIsAuthenticated(true);
         setAuthError(null);
+        console.log("User restored from localStorage:", userData);
       } else {
-        // Token invalid or expired
-        localStorage.removeItem("auth_token");
         setUser(null);
         setIsAuthenticated(false);
-
-        // Check if user not registered error
-        if (data.type === "user_not_registered") {
-          setAuthError({ type: "user_not_registered", message: data.message });
-        }
+        console.log("No auth data found in localStorage");
       }
     } catch (error) {
       console.error("Auth check error:", error);
@@ -177,7 +169,7 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
-        checkUserAuth,
+        // checkUserAuth,
         checkAppState,
       }}
     >

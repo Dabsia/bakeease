@@ -36,8 +36,15 @@ import ResetPassword from "./pages/ResetPassword";
 const UnauthenticatedFallback = () => <Navigate to="/auth" replace />;
 
 // Admin route wrapper component
+// Admin route wrapper component
 const AdminRoute = ({ children }) => {
-  const { isAuthenticated, isLoadingAuth, user, authChecked } = useAuth();
+  const { isAuthenticated, isLoadingAuth, authChecked, user } = useAuth();
+
+  console.log("AdminRoute - isAuthenticated:", isAuthenticated);
+  console.log("AdminRoute - user:", user);
+  console.log("AdminRoute - user role:", user?.role);
+  console.log("AdminRoute - isLoadingAuth:", isLoadingAuth);
+  console.log("AdminRoute - authChecked:", authChecked);
 
   // Wait for auth to check
   if (isLoadingAuth || !authChecked) {
@@ -49,10 +56,15 @@ const AdminRoute = ({ children }) => {
   }
 
   if (!isAuthenticated) {
+    console.log("User not authenticated, redirecting to /auth");
     return <Navigate to="/auth" replace />;
   }
 
   if (user?.role !== "admin") {
+    console.log(
+      "User is not admin, redirecting to /shop. User role:",
+      user?.role,
+    );
     return <Navigate to="/shop" replace />;
   }
 

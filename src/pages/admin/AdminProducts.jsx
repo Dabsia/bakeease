@@ -348,7 +348,6 @@ export default function AdminProducts() {
     "Chocolatey",
     "Nutty",
     "Combo",
-    "Rice",
     "Wheat",
     "Sourdough",
   ];

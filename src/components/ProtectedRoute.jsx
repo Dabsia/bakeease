@@ -14,11 +14,11 @@ export default function ProtectedRoute({
   unauthenticatedElement,
 }) {
   const {
-    isAuthenticated,
+    // isAuthenticated,
     isLoadingAuth,
     authChecked,
-    authError,
-    checkUserAuth,
+    // authError,
+    // checkUserAuth,
   } = useAuth();
 
   // useEffect(() => {
@@ -29,9 +29,9 @@ export default function ProtectedRoute({
   // }, [authChecked, isLoadingAuth, checkUserAuth]);
 
   // Show loading spinner while checking authentication
-  if (isLoadingAuth || !authChecked) {
-    return fallback;
-  }
+  // if (isLoadingAuth || !authChecked) {
+  //   return fallback;
+  // }
 
   // After auth check is complete, handle errors
   // if (authError) {
