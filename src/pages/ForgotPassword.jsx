@@ -41,6 +41,7 @@ export default function ForgotPassword() {
       // Success
       setIsSent(true);
       toast.success(data.message || "Reset link sent to your email!");
+      localStorage.setItem("reset_email", email);
     } catch (error) {
       console.error("Password reset error:", error);
       toast.error(error.message || "Failed to send reset link");

@@ -7,6 +7,8 @@ import { Label } from "../components/ui/label";
 import { Loader2, Lock, Eye, EyeOff, CheckCircle2, Coffee } from "lucide-react";
 import { toast } from "sonner";
 
+const API_URL = "http://localhost:3000/api/v1";
+
 export default function ResetPassword() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -18,7 +20,9 @@ export default function ResetPassword() {
     confirm_password: "",
   });
 
-  // Get token from URL query params
+  const email = localStorage.getItem("reset_email") || "";
+
+  // Get token from URL params
   const { token } = useParams();
   console.log(token);
 
@@ -61,20 +65,35 @@ export default function ResetPassword() {
 
     setIsLoading(true);
 
-    // TODO: Replace with your actual API call
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const response = await fetch(`${API_URL}/auth/change-password/${token}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          newPassword: form.password,
+        }),
+      });
 
-      // Mock successful password reset
+      const data = await response.json();
+      console.log("Reset password response:", data);
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to reset password");
+      }
+
+      // Success
       setIsSuccess(true);
-      toast.success("Password reset successfully!");
+      toast.success(data.message || "Password reset successfully!");
 
       // Redirect to login after 3 seconds
       setTimeout(() => {
         navigate("/auth");
       }, 3000);
     } catch (error) {
+      console.error("Password reset error:", error);
       toast.error(
         error.message || "Failed to reset password. Please try again.",
       );
@@ -204,6 +223,7 @@ export default function ResetPassword() {
                     className="pl-10 pr-10"
                     required
                     autoFocus
+                    disabled={isLoading}
                   />
                   <button
                     type="button"
@@ -234,6 +254,7 @@ export default function ResetPassword() {
                     onChange={handleChange}
                     className="pl-10 pr-10"
                     required
+                    disabled={isLoading}
                   />
                   <button
                     type="button"
