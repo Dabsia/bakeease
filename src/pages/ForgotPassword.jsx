@@ -79,13 +79,6 @@ export default function ForgotPassword() {
             </p>
 
             <div className="space-y-3">
-              <Button
-                onClick={() => setIsSent(false)}
-                variant="outline"
-                className="w-full font-body rounded-full"
-              >
-                Try Another Email
-              </Button>
               <Link to="/auth">
                 <Button className="w-full bg-foreground text-background hover:opacity-90 font-body rounded-full">
                   Back to Sign In

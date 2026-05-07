@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useNavigate, Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -9,7 +9,6 @@ import { toast } from "sonner";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,8 +19,8 @@ export default function ResetPassword() {
   });
 
   // Get token from URL query params
-  const queryParams = new URLSearchParams(location.search);
-  const token = queryParams.get("token");
+  const { token } = useParams();
+  console.log(token);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -77,7 +76,7 @@ export default function ResetPassword() {
       }, 3000);
     } catch (error) {
       toast.error(
-        error.message || "Failed to reset password. Please try again."
+        error.message || "Failed to reset password. Please try again.",
       );
     } finally {
       setIsLoading(false);

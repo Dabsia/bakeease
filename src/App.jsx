@@ -90,7 +90,7 @@ const AuthenticatedApp = () => {
         {/* Public routes - no authentication required */}
         <Route path="/auth" element={<AuthScreen />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/reset/:token" element={<ResetPassword />} />
 
         {/* Protected store routes - require authentication */}
         <Route
