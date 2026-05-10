@@ -7,7 +7,7 @@ import { Label } from "../components/ui/label";
 import { Loader2, Mail, ArrowLeft, CheckCircle2, Coffee } from "lucide-react";
 import { toast } from "sonner";
 
-const API_URL = "http://localhost:3000/api/v1";
+const API_URL = "https://bakeease-backend.onrender.com/api/v1";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");

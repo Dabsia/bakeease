@@ -21,7 +21,7 @@ import { toast } from "sonner";
 import { useAuth } from "../../lib/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = "http://localhost:3000/api/v1";
+const API_URL = "https://bakeease-backend.onrender.com/api/v1";
 
 export default function AdminProfile() {
   const [loading, setLoading] = useState(true);

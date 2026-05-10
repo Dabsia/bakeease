@@ -29,7 +29,7 @@ export default function Contact() {
       console.log("Sending email data:", emailData);
 
       const response = await fetch(
-        "http://localhost:3000/api/v1/email/send-email",
+        "https://bakeease-backend.onrender.com/api/v1/email/send-email",
         {
           method: "POST",
           headers: {
