@@ -1,48 +1,39 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { ShoppingBag } from "lucide-react";
 import { Card, CardContent } from "../components/ui/card";
+import { useQuery } from "@tanstack/react-query";
+
+const API_URL = "https://bakeease-backend.onrender.com/api/v1";
 
 const statusColors = {
-  pending: "bg-yellow-100 text-yellow-700",
-  confirmed: "bg-blue-100 text-blue-700",
-  shipped: "bg-purple-100 text-purple-700",
+  processing: "bg-yellow-100 text-yellow-700",
   delivered: "bg-green-100 text-green-700",
   cancelled: "bg-red-100 text-red-700",
 };
 
 export default function OrderHistory() {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const user = JSON.parse(localStorage.getItem("user"));
 
-  useEffect(() => {
-    // TODO: Replace with your own authentication and order fetching logic
-    const fetchOrders = async () => {
-      try {
-        // Get current user from your auth system
-        // const user = await yourAuth.getCurrentUser();
+  const { data: ordersResponse, isLoading } = useQuery({
+    queryKey: ["orders", user?.id],
+    queryFn: async () => {
+      const token = localStorage.getItem("auth_token");
+      const res = await fetch(`${API_URL}/orders/user/${user?.id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error("Failed to fetch orders");
+      return res.json();
+    },
+    enabled: !!user?.id,
+  });
 
-        // Fetch orders for this user from your API
-        // const orders = await yourApi.getOrders({
-        //   customerEmail: user.email,
-        //   sort: "-created_date",
-        //   limit: 50
-        // });
-        // setOrders(orders);
+  const orders = ordersResponse || [];
 
-        // For now, just simulate loading completion
-        setLoading(false);
-      } catch (error) {
-        // Handle error (user not logged in, etc.)
-        setLoading(false);
-      }
-    };
-
-    fetchOrders();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="py-32 flex justify-center">
         <div className="w-6 h-6 border-4 border-border border-t-foreground rounded-full animate-spin" />
@@ -78,13 +69,13 @@ export default function OrderHistory() {
         </h1>
         <div className="space-y-4">
           {orders.map((order) => (
-            <Card key={order.id}>
+            <Card key={order._id}>
               <CardContent className="py-4 px-5">
                 <div className="flex items-center justify-between mb-3">
                   <div>
                     <p className="font-body text-xs text-muted-foreground">
-                      {order.created_date
-                        ? format(new Date(order.created_date), "MMM d, yyyy")
+                      {order.createdAt
+                        ? format(new Date(order.createdAt), "MMM d, yyyy")
                         : ""}
                     </p>
                     <p className="font-body font-semibold text-sm text-foreground mt-0.5">
@@ -95,10 +86,11 @@ export default function OrderHistory() {
                   <div className="text-right">
                     <span
                       className={`font-body text-xs px-2 py-0.5 rounded-full font-medium ${
-                        statusColors[order.status] || statusColors.pending
+                        statusColors[order.orderStatus] ||
+                        statusColors.processing
                       }`}
                     >
-                      {order.status || "pending"}
+                      {order.orderStatus || "processing"}
                     </span>
                     <p className="font-body font-bold text-sm mt-1">
                       €{order.total?.toFixed(2)}
@@ -112,7 +104,7 @@ export default function OrderHistory() {
                       className="flex justify-between font-body text-sm text-muted-foreground"
                     >
                       <span>
-                        {item.product_name} × {item.quantity}
+                        {item.name} × {item.quantity}
                       </span>
                       <span>€{(item.price * item.quantity).toFixed(2)}</span>
                     </div>
