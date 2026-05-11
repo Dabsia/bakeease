@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useCart } from "../context/CartContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
@@ -12,12 +12,13 @@ const API_BASE_URL = "https://bakeease-backend.onrender.com";
 
 export default function Checkout() {
   const { items, total, clearCart } = useCart();
+  const user = JSON.parse(localStorage.getItem("user"));
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [form, setForm] = useState({
-    customer_name: "",
-    customer_email: "",
+    customer_name: user?.name || "",
+    customer_email: user?.email || "",
     customer_phone: "",
     shipping_address: "",
     city: "",
@@ -25,6 +26,12 @@ export default function Checkout() {
     zip_code: "",
     notes: "",
   });
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/auth");
+    }
+  }, [navigate, user]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -34,7 +41,11 @@ export default function Checkout() {
     try {
       const token = localStorage.getItem("auth_token");
 
-      // Prepare order items for Stripe
+      const nameParts = form.customer_name.trim().split(/\s+/);
+      const firstName = nameParts[0];
+      const lastName =
+        nameParts.length > 1 ? nameParts.slice(1).join(" ") : nameParts[0];
+
       const lineItems = items.map((item) => ({
         productId: item.product_id,
         name: item.product_name,
@@ -53,9 +64,9 @@ export default function Checkout() {
           body: JSON.stringify({
             items: lineItems,
             customer: {
-              firstName: form.customer_name.split(" ")[0] || "",
-              lastName: form.customer_name.split(" ").slice(1).join(" ") || "",
-              email: form.customer_email,
+              firstName,
+              lastName,
+              email: form.customer_email || user?.email,
               phone: form.customer_phone,
               streetAddress: form.shipping_address,
               city: form.city,
@@ -76,10 +87,7 @@ export default function Checkout() {
 
       const { sessionId, url } = await response.json();
 
-      // Store session ID for verification
       localStorage.setItem("stripe_session_id", sessionId);
-
-      // Redirect to Stripe checkout
       window.location.href = url;
     } catch (error) {
       console.error("Checkout error:", error);
@@ -95,7 +103,6 @@ export default function Checkout() {
       return;
     }
 
-    // Validate required fields
     if (
       !form.customer_name ||
       !form.customer_email ||
@@ -118,7 +125,6 @@ export default function Checkout() {
     }
   };
 
-  // Check for successful payment return
   React.useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get("session_id");
