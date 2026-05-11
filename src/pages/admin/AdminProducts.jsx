@@ -56,7 +56,7 @@ export default function AdminProducts() {
 
   // Fetch products
   const {
-    data: productsResponse = [],
+    data: productsResponse,
     isLoading,
     error,
   } = useQuery({
@@ -79,19 +79,17 @@ export default function AdminProducts() {
         throw new Error("Failed to fetch products");
       }
 
-      const data = await response.json();
-      return data.data || [];
+      return response.json();
     },
   });
 
-  const products = productsResponse;
+  const products = productsResponse?.data || [];
 
   // Create product mutation
   const createMutation = useMutation({
     mutationFn: async (data) => {
       const token = localStorage.getItem("auth_token");
 
-      // Create FormData for multipart/form-data
       const formData = new FormData();
       formData.append("name", data.name);
       formData.append("description", data.description);
@@ -102,8 +100,6 @@ export default function AdminProducts() {
       if (data.combo_items && data.combo_items.length > 0) {
         formData.append("combo_items", JSON.stringify(data.combo_items));
       }
-
-      // Append image file if exists
       if (data.imageFile) {
         formData.append("image", data.imageFile);
       }
@@ -113,7 +109,7 @@ export default function AdminProducts() {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        body: formData, // Don't set Content-Type, let browser set it with boundary
+        body: formData,
       });
 
       if (response.status === 401) {
@@ -146,7 +142,6 @@ export default function AdminProducts() {
     mutationFn: async ({ id, data }) => {
       const token = localStorage.getItem("auth_token");
 
-      // Create FormData for multipart/form-data
       const formData = new FormData();
       formData.append("name", data.name);
       formData.append("description", data.description);
@@ -157,8 +152,6 @@ export default function AdminProducts() {
       if (data.combo_items && data.combo_items.length > 0) {
         formData.append("combo_items", JSON.stringify(data.combo_items));
       }
-
-      // Append new image file if exists
       if (data.imageFile) {
         formData.append("image", data.imageFile);
       }
@@ -260,13 +253,11 @@ export default function AdminProducts() {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith("image/")) {
       toast.error("Please upload an image file");
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error("Image size should be less than 5MB");
       return;
@@ -275,7 +266,6 @@ export default function AdminProducts() {
     setUploading(true);
 
     try {
-      // Create preview only, actual upload happens in mutation
       const reader = new FileReader();
       reader.onloadend = () => {
         setForm((prev) => ({
@@ -322,8 +312,6 @@ export default function AdminProducts() {
       return;
     }
 
-    // For editing, if no new image is selected, we don't send an image file
-    // The backend should keep the existing image
     const data = {
       name: form.name,
       description: form.description,
@@ -332,7 +320,7 @@ export default function AdminProducts() {
       loafSize: form.loafSize,
       ingredients: form.ingredients,
       combo_items: form.combo_items,
-      imageFile: form.imageFile, // Will be undefined if no new image selected
+      imageFile: form.imageFile,
     };
 
     if (editing) {
@@ -357,7 +345,6 @@ export default function AdminProducts() {
   const isSaving = createMutation.isPending || updateMutation.isPending;
   const isDisabled = uploading || isSaving;
 
-  // Check if user is admin
   if (user?.role !== "admin") {
     return (
       <div className="flex items-center justify-center h-96">

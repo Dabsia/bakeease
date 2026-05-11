@@ -40,12 +40,6 @@ const UnauthenticatedFallback = () => <Navigate to="/auth" replace />;
 const AdminRoute = ({ children }) => {
   const { isAuthenticated, isLoadingAuth, authChecked, user } = useAuth();
 
-  console.log("AdminRoute - isAuthenticated:", isAuthenticated);
-  console.log("AdminRoute - user:", user);
-  console.log("AdminRoute - user role:", user?.role);
-  console.log("AdminRoute - isLoadingAuth:", isLoadingAuth);
-  console.log("AdminRoute - authChecked:", authChecked);
-
   // Wait for auth to check
   if (isLoadingAuth || !authChecked) {
     return (

@@ -36,29 +36,42 @@ const statusColors = {
 export default function AdminOrders() {
   const queryClient = useQueryClient();
   const [selected, setSelected] = useState(null);
+  const API_BASE_URL = "https://bakeease-backend.onrender.com";
 
-  // TODO: Replace with your own orders fetching logic
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ["admin-orders"],
     queryFn: async () => {
-      // Replace this with your actual API call
-      // Example: return await yourApi.getOrders({ sort: "-created_date", limit: 100 });
-
-      // For now, return empty array
-      return [];
+      const token = localStorage.getItem("auth_token");
+      const res = await fetch(`${API_BASE_URL}/api/v1/orders`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error("Failed to fetch orders");
+      return res.json();
     },
   });
 
-  // TODO: Replace with your own order update logic
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }) => {
-      // Replace this with your actual API call
-      // Example: return await yourApi.updateOrder(id, data);
-      return { id, ...data };
+      const token = localStorage.getItem("auth_token");
+      const res = await fetch(`${API_BASE_URL}/api/v1/orders/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to update order");
+      return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-orders"] });
       toast.success("Order updated");
+    },
+    onError: () => {
+      toast.error("Failed to update order");
     },
   });
 
@@ -81,19 +94,19 @@ export default function AdminOrders() {
       ) : (
         <div className="space-y-3">
           {orders.map((order) => (
-            <Card key={order.id}>
+            <Card key={order._id}>
               <CardContent className="flex items-center gap-4 py-3 px-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-body font-semibold text-sm">
-                      {order.customer_name}
+                      {order.firstName}
                     </h3>
                     <span
                       className={`font-body text-xs px-2 py-0.5 rounded-full font-medium ${
-                        statusColors[order.status] || statusColors.pending
+                        statusColors[order.orderStatus] || statusColors.pending
                       }`}
                     >
-                      {order.status || "pending"}
+                      {order.orderStatus || "pending"}
                     </span>
                   </div>
                   <p className="font-body text-xs text-muted-foreground">
@@ -105,18 +118,19 @@ export default function AdminOrders() {
                   </p>
                 </div>
                 <Select
-                  value={order.status || "pending"}
+                  value={order.orderStatus || "processing"}
                   onValueChange={(v) =>
-                    updateMutation.mutate({ id: order.id, data: { status: v } })
+                    updateMutation.mutate({
+                      id: order._id,
+                      data: { orderStatus: v },
+                    })
                   }
                 >
                   <SelectTrigger className="w-32 font-body text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="confirmed">Confirmed</SelectItem>
-                    <SelectItem value="shipped">Shipped</SelectItem>
+                    <SelectItem value="processing">Processing</SelectItem>
                     <SelectItem value="delivered">Delivered</SelectItem>
                     <SelectItem value="cancelled">Cancelled</SelectItem>
                   </SelectContent>
@@ -146,21 +160,21 @@ export default function AdminOrders() {
               <div className="grid grid-cols-2 gap-3 font-body text-sm">
                 <div>
                   <p className="text-muted-foreground text-xs">Customer</p>
-                  <p className="font-medium">{selected.customer_name}</p>
+                  <p className="font-medium">{selected.firstName}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground text-xs">Email</p>
-                  <p className="font-medium">{selected.customer_email}</p>
+                  <p className="font-medium">{selected.email}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground text-xs">Phone</p>
-                  <p className="font-medium">
-                    {selected.customer_phone || "—"}
-                  </p>
+                  <p className="font-medium">{selected.phone || "—"}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground text-xs">Status</p>
-                  <p className="font-medium capitalize">{selected.status}</p>
+                  <p className="font-medium capitalize">
+                    {selected.orderStatus}
+                  </p>
                 </div>
               </div>
               {selected.shipping_address && (
@@ -185,7 +199,7 @@ export default function AdminOrders() {
                       className="flex justify-between font-body text-sm"
                     >
                       <span>
-                        {item.product_name} x{item.quantity}
+                        {item.name} x{item.quantity}
                       </span>
                       <span className="font-semibold">
                         €{(item.price * item.quantity).toFixed(2)}
