@@ -263,7 +263,7 @@ import { Textarea } from "../components/ui/textarea";
 import { ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
-const API_BASE_URL = "https://de-ultimate-backend.onrender.com";
+const API_BASE_URL = "https://bakeease-backend.onrender.com";
 
 export default function Checkout() {
   const { items, total, clearCart } = useCart();
