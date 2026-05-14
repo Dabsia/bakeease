@@ -6,7 +6,7 @@ import { Button } from "../ui/button";
 
 const navLinks = [
   { label: "All Breads", path: "/shop" },
-  { label: "Orders", path: "/orders" },
+  // { label: "Orders", path: "/orders" },
   { label: "Contact", path: "/contact" },
 ];
 
@@ -47,7 +47,7 @@ export default function Navbar() {
 
         <div className="flex items-center gap-2">
           {/* User profile icon */}
-          <Link
+          {/* <Link
             to={isLoggedIn ? "/profile" : "/auth"}
             className="hidden sm:block"
             title="My Profile"
@@ -55,7 +55,7 @@ export default function Navbar() {
             <Button variant="ghost" size="icon" className="rounded-full">
               <UserCircle className="w-5 h-5" />
             </Button>
-          </Link>
+          </Link> */}
           <Link to="/cart" className="relative">
             <Button variant="ghost" size="icon" className="rounded-full">
               <ShoppingCart className="w-4 h-4" />
@@ -92,7 +92,7 @@ export default function Navbar() {
               {link.label}
             </button>
           ))}
-          {isLoggedIn ? (
+          {/* {isLoggedIn ? (
             <button
               onClick={() => handleNavClick("/profile")}
               className="block w-full text-left py-3 font-body font-medium text-sm text-muted-foreground"
@@ -106,7 +106,7 @@ export default function Navbar() {
             >
               Login/Signup
             </button>
-          )}
+          )} */}
         </div>
       )}
     </header>

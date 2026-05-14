@@ -41,18 +41,18 @@ const AdminRoute = ({ children }) => {
   const { isAuthenticated, isLoadingAuth, authChecked, user } = useAuth();
 
   // Wait for auth to check
-  if (isLoadingAuth || !authChecked) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+  // if (isLoadingAuth || !authChecked) {
+  //   return (
+  //     <div className="fixed inset-0 flex items-center justify-center">
+  //       <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+  //     </div>
+  //   );
+  // }
 
-  if (!isAuthenticated) {
-    console.log("User not authenticated, redirecting to /auth");
-    return <Navigate to="/auth" replace />;
-  }
+  // if (!isAuthenticated) {
+  //   console.log("User not authenticated, redirecting to /auth");
+  //   return <Navigate to="/auth" replace />;
+  // }
 
   if (user?.role !== "admin") {
     console.log(
@@ -90,7 +90,7 @@ const AuthenticatedApp = () => {
         <Route
           element={
             <ProtectedRoute
-              unauthenticatedElement={<UnauthenticatedFallback />}
+              // unauthenticatedElement={<UnauthenticatedFallback />}
             />
           }
         >

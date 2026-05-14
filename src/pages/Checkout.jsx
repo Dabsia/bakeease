@@ -12,13 +12,13 @@ const API_BASE_URL = "https://bakeease-backend.onrender.com";
 
 export default function Checkout() {
   const { items, total, clearCart } = useCart();
-  const user = JSON.parse(localStorage.getItem("user"));
+  // const user = JSON.parse(localStorage.getItem("user"));
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [form, setForm] = useState({
-    customer_name: user?.name || "",
-    customer_email: user?.email || "",
+    customer_name:  "",
+    customer_email: "",
     customer_phone: "",
     shipping_address: "",
     city: "",
@@ -27,11 +27,11 @@ export default function Checkout() {
     notes: "",
   });
 
-  useEffect(() => {
-    if (!user) {
-      navigate("/auth");
-    }
-  }, [navigate, user]);
+  // useEffect(() => {
+  //   if (!user) {
+  //     navigate("/auth");
+  //   }
+  // }, [navigate, user]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -234,6 +234,7 @@ export default function Checkout() {
             <div>
               <Label className="font-body text-sm">Phone *</Label>
               <Input
+              type='number'
                 name="customer_phone"
                 value={form.customer_phone}
                 onChange={handleChange}
