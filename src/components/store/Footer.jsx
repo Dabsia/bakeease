@@ -32,7 +32,7 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
             <h3 className="font-heading text-xl font-bold mb-3">
-              GourmetTwist
+              Tiara's Bread Hub
             </h3>
             <p className="font-body text-sm text-background/60 mb-5">
               Freshly baked joy, straight to your door.
@@ -49,7 +49,7 @@ export default function Footer() {
                 {/* <Instagram className="w-4 h-4" /> */}
               </a>
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/profile.php?id=61557920194244"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full  flex items-center justify-center hover:bg-foreground hover:text-background transition-colors"
@@ -77,12 +77,12 @@ export default function Footer() {
               >
                 All Breads
               </Link>
-              <Link
+              {/* <Link
                 to="/orders"
                 className="block hover:text-background transition-colors"
               >
                 Orders
-              </Link>
+              </Link> */}
               <Link
                 to="/contact"
                 className="block hover:text-background transition-colors"
@@ -121,18 +121,18 @@ export default function Footer() {
             <div className="space-y-3 font-body text-sm text-background/60">
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 flex-shrink-0" />
-                <span>hello@gourmettwist.com</span>
+                <span>tiarasbeadhub@gmail.com</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 flex-shrink-0" />
-                <span>+1 (555) 123-4567</span>
+                <span>+372 5379 0302</span>
               </div>
             </div>
           </div>
         </div>
 
         <div className="max-w-7xl mx-auto mt-10 pt-6 border-t border-background/10 text-center font-body text-xs text-background/40">
-          © 2026 GourmetTwist. All rights reserved.
+          © 2026 Tiara's Bread Hub. All rights reserved.
         </div>
       </div>
 

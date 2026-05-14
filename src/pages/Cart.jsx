@@ -60,44 +60,55 @@ export default function Cart() {
                   </div>
                 )}
               </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-body font-semibold text-sm text-foreground truncate">
-                  {item.product_name}
-                </h3>
-                <p className="font-body text-sm text-muted-foreground mt-1">
+
+              {/* Right side: stacked layout that works on all screen sizes */}
+              <div className="flex-1 min-w-0 flex flex-col gap-2">
+                {/* Top row: name + trash */}
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="font-body font-semibold text-sm text-foreground">
+                    {item.product_name}
+                  </h3>
+                  <button
+                    onClick={() => removeItem(item.product_id)}
+                    className="text-muted-foreground hover:text-destructive transition-colors flex-shrink-0"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Unit price */}
+                <p className="font-body text-sm text-muted-foreground">
                   €{item.price.toFixed(2)}
                 </p>
+
+                {/* Bottom row: quantity controls + line total */}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center border  border-border rounded-lg overflow-hidden">
+                    <button
+                      onClick={() =>
+                        updateQuantity(item.product_id, item.quantity - 1)
+                      }
+                      className="px-2 py-1 hover:bg-muted transition-colors"
+                    >
+                      <Minus className="w-3 h-3" />
+                    </button>
+                    <span className="px-3 py-1 font-body text-sm font-semibold">
+                      {item.quantity}
+                    </span>
+                    <button
+                      onClick={() =>
+                        updateQuantity(item.product_id, item.quantity + 1)
+                      }
+                      className="px-2 py-1 hover:bg-muted transition-colors"
+                    >
+                      <Plus className="w-3 h-3" />
+                    </button>
+                  </div>
+                  <span className="font-body font-semibold text-sm">
+                    €{(item.price * item.quantity).toFixed(2)}
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center border border-border rounded-lg overflow-hidden">
-                <button
-                  onClick={() =>
-                    updateQuantity(item.product_id, item.quantity - 1)
-                  }
-                  className="px-2 py-1 hover:bg-muted transition-colors"
-                >
-                  <Minus className="w-3 h-3" />
-                </button>
-                <span className="px-3 py-1 font-body text-sm font-semibold">
-                  {item.quantity}
-                </span>
-                <button
-                  onClick={() =>
-                    updateQuantity(item.product_id, item.quantity + 1)
-                  }
-                  className="px-2 py-1 hover:bg-muted transition-colors"
-                >
-                  <Plus className="w-3 h-3" />
-                </button>
-              </div>
-              <span className="font-body font-semibold text-sm w-20 text-right">
-                €{(item.price * item.quantity).toFixed(2)}
-              </span>
-              <button
-                onClick={() => removeItem(item.product_id)}
-                className="text-muted-foreground hover:text-destructive transition-colors"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
             </div>
           ))}
         </div>

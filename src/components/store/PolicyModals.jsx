@@ -7,7 +7,7 @@ const policies = {
     content: [
       {
         heading: "Our Commitment",
-        body: "At GourmetTwist, your satisfaction is our top priority. We stand behind the quality of every loaf we bake. If you're not completely happy with your order, we want to make it right.",
+        body: "At Tiara's Bread Hub, your satisfaction is our top priority. We stand behind the quality of every loaf we bake. If you're not completely happy with your order, we want to make it right.",
       },
       {
         heading: "1. Eligibility for Refunds",
@@ -19,7 +19,7 @@ const policies = {
       },
       {
         heading: "3. Damaged or Incorrect Orders",
-        body: "If you received a damaged or wrong item, please contact us immediately at hello@gourmettwist.com with a photo. We will send a replacement at no extra charge or issue a full refund.",
+        body: "If you received a damaged or wrong item, please contact us immediately at tiarasbeadhub@gmail.com with a photo. We will send a replacement at no extra charge or issue a full refund.",
       },
       {
         heading: "4. Processing Refunds",
@@ -27,7 +27,7 @@ const policies = {
       },
       {
         heading: "5. Contact Us",
-        body: "For any refund-related questions, please reach out to us at hello@gourmettwist.com or call +1 (555) 123-4567.",
+        body: "For any refund-related questions, please reach out to us at tiarasbeadhub@gmail.com or call +372 5379 0302.",
       },
     ],
   },
@@ -36,7 +36,7 @@ const policies = {
     content: [
       {
         heading: "Introduction",
-        body: "GourmetTwist is committed to protecting your personal information. This Privacy Policy explains how we collect, use, and safeguard your data when you visit our website or make a purchase.",
+        body: "Tiara's Bread Hub is committed to protecting your personal information. This Privacy Policy explains how we collect, use, and safeguard your data when you visit our website or make a purchase.",
       },
       {
         heading: "1. Information We Collect",
@@ -60,7 +60,7 @@ const policies = {
       },
       {
         heading: "6. Contact Us",
-        body: "If you have questions about this Privacy Policy, contact us at hello@gourmettwist.com.",
+        body: "If you have questions about this Privacy Policy, contact us at tiarasbeadhub@gmail.com.",
       },
     ],
   },
@@ -69,7 +69,7 @@ const policies = {
     content: [
       {
         heading: "Introduction",
-        body: "Thank you for choosing GourmetTwist. These terms and conditions outline the rules and regulations for the use of our website and services. By accessing this website, you accept these terms and conditions in full. Please do not continue to use GourmetTwist's website if you do not accept all of the terms and conditions stated on this page.",
+        body: "Thank you for choosing Tiara's Bread Hub. These terms and conditions outline the rules and regulations for the use of our website and services. By accessing this website, you accept these terms and conditions in full. Please do not continue to use Tiara's Bread Hub's website if you do not accept all of the terms and conditions stated on this page.",
       },
       {
         heading: "1. User Agreement",
@@ -85,11 +85,11 @@ const policies = {
       },
       {
         heading: "4. Intellectual Property",
-        body: "All content on this website, including text, graphics, logos, and images, is the property of GourmetTwist and is protected by applicable intellectual property laws. You may not reproduce or distribute any content without our prior written permission.",
+        body: "All content on this website, including text, graphics, logos, and images, is the property of Tiara's Bread Hub and is protected by applicable intellectual property laws. You may not reproduce or distribute any content without our prior written permission.",
       },
       {
         heading: "5. Limitation of Liability",
-        body: "GourmetTwist shall not be liable for any indirect, incidental, or consequential damages arising from the use of our products or website. Our liability is limited to the amount paid for the product in question.",
+        body: "Tiara's Bread Hub shall not be liable for any indirect, incidental, or consequential damages arising from the use of our products or website. Our liability is limited to the amount paid for the product in question.",
       },
       {
         heading: "6. Changes to Terms",

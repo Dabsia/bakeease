@@ -29,7 +29,7 @@ export default function Navbar() {
           to="/"
           className="font-heading text-xl font-black text-foreground tracking-tight"
         >
-          GourmetTwist
+          Tiara's Bread Hub
         </Link>
 
         {/* Desktop nav */}

@@ -50,12 +50,12 @@ export default function HeroSection() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="flex gap-4 justify-center md:justify-start"
             >
-              <Link
+              {/* <Link
                 to="/shop?category=combo"
                 className="bg-foreground text-background font-body font-semibold px-6 py-3 rounded-full hover:opacity-90 transition-opacity text-sm"
               >
                 SHOP BUNDLES
-              </Link>
+              </Link> */}
               <Link
                 to="/shop"
                 className="bg-background text-foreground font-body font-semibold px-6 py-3 rounded-full hover:opacity-90 transition-opacity text-sm"

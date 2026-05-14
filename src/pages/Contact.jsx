@@ -141,7 +141,7 @@ export default function Contact() {
                 required
                 disabled={isLoading}
                 className="mt-1"
-                placeholder="Do you make peppersoup? ..."
+                placeholder="Type Message"
               />
             </div>
 
@@ -188,11 +188,11 @@ export default function Contact() {
               <div className="space-y-3">
                 <div className="flex items-center gap-3 font-body text-sm text-muted-foreground">
                   <Mail className="w-4 h-4 text-foreground flex-shrink-0" />
-                  <span>hello@gourmettwist.com</span>
+                  <span>tiarasbeadhub@gmail.com</span>
                 </div>
                 <div className="flex items-center gap-3 font-body text-sm text-muted-foreground">
                   <Phone className="w-4 h-4 text-foreground flex-shrink-0" />
-                  <span>+1 (555) 123-4567</span>
+                  <span>+372 5379 0302</span>
                 </div>
               </div>
             </div>
@@ -209,7 +209,7 @@ export default function Contact() {
                   <FaInstagram className="w-4 h-4 text-purple-500" />
                 </a>
                 <a
-                  href="https://facebook.com"
+                  href="https://www.facebook.com/profile.php?id=61557920194244"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-foreground hover:text-background transition-colors"

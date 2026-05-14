@@ -166,7 +166,7 @@ export default function Checkout() {
           Order Placed!
         </h1>
         <p className="font-body text-muted-foreground mb-6">
-          Thank you for your order. We'll send you a confirmation email shortly.
+          Thank you for your order. Your order will be processed immediately.
         </p>
         <Link
           to="/"

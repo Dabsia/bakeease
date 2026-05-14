@@ -37,7 +37,7 @@ export default function OurStorySection() {
             Our Story
           </h2>
           <p className="font-body text-muted-foreground mb-8 max-w-md">
-            GourmetTwist began with a simple idea: create banana bread that
+            Tiara's Bread Hub began with a simple idea: create banana bread that
             actually tastes homemade, soft, moist, and full of real flavor.
           </p>
           <div className="space-y-6 border-l-2 border-primary pl-6">

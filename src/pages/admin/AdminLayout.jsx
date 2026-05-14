@@ -29,7 +29,7 @@ export default function AdminLayout() {
           >
             <ArrowLeft className="w-4 h-4" />
           </Link>
-          <h1 className="font-heading text-lg font-bold">GourmetTwist Admin</h1>
+          <h1 className="font-heading text-lg font-bold">Tiara's Bread Hub Admin</h1>
         </div>
       </header>
 
