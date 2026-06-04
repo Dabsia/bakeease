@@ -194,7 +194,7 @@ export default function AuthScreen() {
         >
           <div className="p-6 md:p-8">
             {/* Tab Switcher */}
-            <div className="flex gap-2 p-1 bg-muted rounded-lg mb-6">
+            {/* <div className="flex gap-2 p-1 bg-muted rounded-lg mb-6">
               <button
                 onClick={() => {
                   setIsLogin(true);
@@ -223,7 +223,7 @@ export default function AuthScreen() {
               >
                 Sign Up
               </button>
-            </div>
+            </div> */}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Full Name - Only for Sign Up */}
