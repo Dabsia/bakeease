@@ -13,7 +13,7 @@ import {
   Copy,
 } from "lucide-react";
 import { toast } from "sonner";
-import { getBankDetails, DEFAULT_BANK_DETAILS } from "../lib/bankDetails";
+import { DEFAULT_BANK_DETAILS } from "../lib/bankDetails";
 import { generatePaymentReference } from "../utils";
 import { API_URL } from "../lib/api";
 import { useLanguage } from "../context/LanguageContext";
@@ -38,15 +38,7 @@ export default function Checkout() {
     notes: "",
   });
 
-  useEffect(() => {
-    if (step === "payment") {
-      setLoadingBankDetails(true);
-      getBankDetails()
-        .then(setBankDetails)
-        .catch(() => toast.error(t("checkout.bankLoadError")))
-        .finally(() => setLoadingBankDetails(false));
-    }
-  }, [step]);
+
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -213,15 +205,15 @@ export default function Checkout() {
     );
   }
 
-  const bankFields = bankDetails
-    ? [
+  const bankFields =
+    [
         { label: t("checkout.accountName"), value: DEFAULT_BANK_DETAILS.accountName },
         { label: t("checkout.bankName"), value: DEFAULT_BANK_DETAILS.bankName },
         { label: t("checkout.accountNumber"), value: DEFAULT_BANK_DETAILS.accountNumber },
         { label: t("checkout.iban"), value: DEFAULT_BANK_DETAILS.iban },
         { label: t("checkout.swift"), value: DEFAULT_BANK_DETAILS.swiftCode },
       ].filter((field) => field.value)
-    : [];
+    
 
   return (
     <div className="py-8 px-4">
