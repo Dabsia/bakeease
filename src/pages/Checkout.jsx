@@ -13,7 +13,7 @@ import {
   Copy,
 } from "lucide-react";
 import { toast } from "sonner";
-import { getBankDetails } from "../lib/bankDetails";
+import { getBankDetails, DEFAULT_BANK_DETAILS } from "../lib/bankDetails";
 import { generatePaymentReference } from "../utils";
 import { API_URL } from "../lib/api";
 import { useLanguage } from "../context/LanguageContext";
@@ -215,11 +215,11 @@ export default function Checkout() {
 
   const bankFields = bankDetails
     ? [
-        { label: t("checkout.accountName"), value: bankDetails.accountName },
-        { label: t("checkout.bankName"), value: bankDetails.bankName },
-        { label: t("checkout.accountNumber"), value: bankDetails.accountNumber },
-        { label: t("checkout.iban"), value: bankDetails.iban },
-        { label: t("checkout.swift"), value: bankDetails.swiftCode },
+        { label: t("checkout.accountName"), value: DEFAULT_BANK_DETAILS.accountName },
+        { label: t("checkout.bankName"), value: DEFAULT_BANK_DETAILS.bankName },
+        { label: t("checkout.accountNumber"), value: DEFAULT_BANK_DETAILS.accountNumber },
+        { label: t("checkout.iban"), value: DEFAULT_BANK_DETAILS.iban },
+        { label: t("checkout.swift"), value: DEFAULT_BANK_DETAILS.swiftCode },
       ].filter((field) => field.value)
     : [];
 

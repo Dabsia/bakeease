@@ -1,7 +1,7 @@
 import { API_URL } from "./api";
 const STORAGE_KEY = "bakeease_bank_details";
 
-const DEFAULT_BANK_DETAILS = {
+export const DEFAULT_BANK_DETAILS = {
   accountName: import.meta.env.VITE_BANK_ACCOUNT_NAME,
   accountNumber: import.meta.env.VITE_BANK_ACCOUNT_NUMBER,
   bankName: import.meta.env.VITE_BANK_NAME,
