@@ -34,27 +34,10 @@ import AuthScreen from "./pages/AuthScreen";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 
-// Unauthenticated fallback component
-const UnauthenticatedFallback = () => <Navigate to="/auth" replace />;
+// Admin route wrapper component
 
-// Admin route wrapper component
-// Admin route wrapper component
 const AdminRoute = ({ children }) => {
-  const { isAuthenticated, isLoadingAuth, authChecked, user } = useAuth();
-
-  // Wait for auth to check
-  // if (isLoadingAuth || !authChecked) {
-  //   return (
-  //     <div className="fixed inset-0 flex items-center justify-center">
-  //       <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
-  //     </div>
-  //   );
-  // }
-
-  // if (!isAuthenticated) {
-  //   console.log("User not authenticated, redirecting to /auth");
-  //   return <Navigate to="/auth" replace />;
-  // }
+  const { isAuthenticated, isLoadingAuth, authChecked, user } = useAuth()
 
   if (user?.role !== "admin") {
     console.log(
