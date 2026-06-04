@@ -8,11 +8,13 @@ import { FaFacebook, FaInstagram } from "react-icons/fa6";
 import { toast } from "sonner";
 import { FaTiktok } from "react-icons/fa";
 import { API_URL } from "../lib/api";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function Contact() {
+  const { t } = useLanguage();
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [isLoading, setIsLoading] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState(null); // 'success', 'error', or null
+  const [submitStatus, setSubmitStatus] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,14 +22,11 @@ export default function Contact() {
     setSubmitStatus(null);
 
     try {
-      // Transform form data to match API expected format
       const emailData = {
         name: form.name,
         from: form.email,
         message: form.message,
       };
-
-      console.log("Sending email data:", emailData);
 
       const response = await fetch(`${API_URL}/email/send-email`, {
         method: "POST",
@@ -38,7 +37,6 @@ export default function Contact() {
       });
 
       const data = await response.json();
-      console.log("API Response:", data);
 
       if (!response.ok) {
         throw new Error(
@@ -46,32 +44,22 @@ export default function Contact() {
         );
       }
 
-      // Success - show different feedback methods
       setSubmitStatus("success");
-      toast.success(
-        "✓ Message sent successfully! We'll get back to you soon.",
-        {
-          duration: 5000,
-          position: "top-center",
-        },
-      );
+      toast.success(t("contact.toastSuccess"), {
+        duration: 5000,
+        position: "top-center",
+      });
 
-      // Reset form
       setForm({ name: "", email: "", message: "" });
     } catch (error) {
       console.error("Error sending message:", error);
       setSubmitStatus("error");
-      toast.error(
-        error.message || "Failed to send message. Please try again.",
-        {
-          duration: 5000,
-          position: "top-center",
-        },
-      );
+      toast.error(error.message || t("contact.toastError"), {
+        duration: 5000,
+        position: "top-center",
+      });
     } finally {
       setIsLoading(false);
-
-      // Clear status after 5 seconds
       setTimeout(() => setSubmitStatus(null), 5000);
     }
   };
@@ -80,18 +68,16 @@ export default function Contact() {
     <div className="py-16 px-4 min-h-screen">
       <div className="max-w-4xl mx-auto">
         <h1 className="font-heading text-4xl md:text-5xl font-black text-foreground mb-4">
-          Contact Us
+          {t("contact.title")}
         </h1>
         <p className="font-body text-muted-foreground mb-12 text-base">
-          Have a question or want to place a custom order? We'd love to hear
-          from you.
+          {t("contact.subtitle")}
         </p>
 
-        {/* Status Message Banner */}
         {submitStatus === "success" && (
           <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
             <p className="text-green-800 font-body text-sm">
-              ✓ Message sent successfully! We'll get back to you soon.
+              {t("contact.successBanner")}
             </p>
           </div>
         )}
@@ -99,16 +85,15 @@ export default function Contact() {
         {submitStatus === "error" && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-red-800 font-body text-sm">
-              ✗ Failed to send message. Please try again or contact us directly.
+              {t("contact.errorBanner")}
             </p>
           </div>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <Label className="font-body text-sm">Your Name</Label>
+              <Label className="font-body text-sm">{t("contact.yourName")}</Label>
               <Input
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -119,7 +104,7 @@ export default function Contact() {
               />
             </div>
             <div>
-              <Label className="font-body text-sm">Email</Label>
+              <Label className="font-body text-sm">{t("contact.email")}</Label>
               <Input
                 type="email"
                 value={form.email}
@@ -131,7 +116,7 @@ export default function Contact() {
               />
             </div>
             <div>
-              <Label className="font-body text-sm">Message</Label>
+              <Label className="font-body text-sm">{t("contact.message")}</Label>
               <Textarea
                 value={form.message}
                 onChange={(e) => setForm({ ...form, message: e.target.value })}
@@ -139,11 +124,10 @@ export default function Contact() {
                 required
                 disabled={isLoading}
                 className="mt-1"
-                placeholder="Type Message"
+                placeholder={t("contact.message")}
               />
             </div>
 
-            {/* Submit Button with different states */}
             <Button
               type="submit"
               disabled={isLoading}
@@ -158,30 +142,28 @@ export default function Contact() {
               {isLoading ? (
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                  SENDING...
+                  {t("contact.sending")}
                 </div>
               ) : submitStatus === "success" ? (
-                "✓ MESSAGE SENT!"
+                t("contact.sent")
               ) : submitStatus === "error" ? (
-                "✗ FAILED - TRY AGAIN"
+                t("contact.failed")
               ) : (
-                "SEND MESSAGE"
+                t("contact.send")
               )}
             </Button>
 
-            {/* Additional feedback text */}
             {submitStatus === "success" && (
               <p className="text-center text-green-600 text-sm font-body">
-                Thank you for reaching out! We'll respond within 24 hours.
+                {t("contact.thankYou")}
               </p>
             )}
           </form>
 
-          {/* Info */}
           <div className="space-y-8">
             <div>
               <h3 className="font-heading text-xl font-bold mb-4">
-                Get In Touch
+                {t("contact.getInTouch")}
               </h3>
               <div className="space-y-3">
                 <div className="flex items-center gap-3 font-body text-sm text-muted-foreground">
@@ -196,7 +178,9 @@ export default function Contact() {
             </div>
 
             <div>
-              <h3 className="font-heading text-xl font-bold mb-4">Follow Us</h3>
+              <h3 className="font-heading text-xl font-bold mb-4">
+                {t("contact.followUs")}
+              </h3>
               <div className="flex gap-4">
                 <a
                   href="https://www.instagram.com/tiara_breadhub/"

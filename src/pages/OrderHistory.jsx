@@ -6,6 +6,7 @@ import { Card, CardContent } from "../components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 
 import { API_URL } from "../lib/api";
+import { useLanguage } from "../context/LanguageContext";
 
 const statusColors = {
   processing: "bg-yellow-100 text-yellow-700",
@@ -14,6 +15,7 @@ const statusColors = {
 };
 
 export default function OrderHistory() {
+  const { t } = useLanguage();
   const user = JSON.parse(localStorage.getItem("user"));
 
   const { data: ordersResponse, isLoading } = useQuery({
@@ -46,16 +48,16 @@ export default function OrderHistory() {
       <div className="py-32 text-center px-4">
         <ShoppingBag className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
         <h1 className="font-heading text-2xl font-bold text-foreground mb-2">
-          No orders yet
+          {t("orders.emptyTitle")}
         </h1>
         <p className="font-body text-muted-foreground mb-6">
-          Once you place an order, it will appear here.
+          {t("orders.emptySubtitle")}
         </p>
         <Link
           to="/shop"
           className="inline-block bg-foreground text-background font-body font-semibold px-8 py-3 rounded-full hover:opacity-90 transition-opacity text-sm"
         >
-          SHOP NOW
+          {t("orders.shopNow")}
         </Link>
       </div>
     );

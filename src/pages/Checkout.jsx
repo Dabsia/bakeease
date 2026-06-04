@@ -16,9 +16,11 @@ import { toast } from "sonner";
 import { getBankDetails } from "../lib/bankDetails";
 import { generatePaymentReference } from "../utils";
 import { API_URL } from "../lib/api";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function Checkout() {
   const { items, total, clearCart } = useCart();
+  const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [step, setStep] = useState("details");
@@ -41,7 +43,7 @@ export default function Checkout() {
       setLoadingBankDetails(true);
       getBankDetails()
         .then(setBankDetails)
-        .catch(() => toast.error("Could not load bank details"))
+        .catch(() => toast.error(t("checkout.bankLoadError")))
         .finally(() => setLoadingBankDetails(false));
     }
   }, [step]);
@@ -52,7 +54,7 @@ export default function Checkout() {
 
   const copyToClipboard = (text, label) => {
     navigator.clipboard.writeText(text);
-    toast.success(`${label} copied to clipboard`);
+    toast.success(t("checkout.copied", { label }));
   };
 
   const createCheckoutSession = async () => {
@@ -85,10 +87,22 @@ export default function Checkout() {
           phone: form.customer_phone,
           streetAddress: form.shipping_address,
           city: form.city,
+          state: form.state,
           postcode: form.zip_code,
-          country: form.state || "Estonia",
+          country: "Estonia",
           additionalInfo: form.notes,
         },
+        // Flat fields for admin delivery view (and backends that persist top-level address)
+        firstName,
+        lastName,
+        email: form.customer_email,
+        phone: form.customer_phone,
+        shipping_address: form.shipping_address,
+        city: form.city,
+        state: form.state,
+        zip_code: form.zip_code,
+        country: "Estonia",
+        additionalInfo: form.notes,
         subtotal: total,
         total: total,
         paymentMethod: "bank_transfer",
@@ -98,7 +112,7 @@ export default function Checkout() {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || "Failed to place order");
+      throw new Error(error.message || t("checkout.orderFailed"));
     }
 
     return response.json();
@@ -106,7 +120,7 @@ export default function Checkout() {
 
   const validateForm = () => {
     if (items.length === 0) {
-      toast.error("Your cart is empty");
+      toast.error(t("checkout.cartEmpty"));
       return false;
     }
 
@@ -118,7 +132,7 @@ export default function Checkout() {
       !form.city ||
       !form.zip_code
     ) {
-      toast.error("Please fill in all required fields");
+      toast.error(t("checkout.fillRequired"));
       return false;
     }
 
@@ -140,10 +154,10 @@ export default function Checkout() {
       await createCheckoutSession();
       clearCart();
       setOrderPlaced(true);
-      toast.success("Order placed! We will confirm once your payment is received.");
+      toast.success(t("checkout.orderSuccess"));
     } catch (error) {
       console.error("Order error:", error);
-      toast.error(error.message || "Failed to place order");
+      toast.error(error.message || t("checkout.orderFailed"));
     } finally {
       setIsSubmitting(false);
     }
@@ -154,11 +168,10 @@ export default function Checkout() {
       <div className="py-32 text-center px-4">
         <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
         <h1 className="font-heading text-3xl font-bold text-foreground mb-2">
-          Order Placed!
+          {t("checkout.orderPlaced")}
         </h1>
         <p className="font-body text-muted-foreground mb-6 max-w-md mx-auto">
-          Thank you for your order. We will verify your bank transfer and process
-          your order shortly. You will receive a confirmation email at{" "}
+          {t("checkout.thankYou")}{" "}
           <span className="font-semibold text-foreground">
             {form.customer_email}
           </span>
@@ -167,14 +180,13 @@ export default function Checkout() {
         {paymentReference && (
           <div className=" bg-muted border w-fit mx-auto border-border rounded-xl px-6 py-4 mb-6">
             <p className="font-body text-xs text-muted-foreground mb-1">
-              Your payment reference
+              {t("checkout.paymentRef")}
             </p>
             <p className="font-heading text-lg font-bold tracking-wide">
               {paymentReference}
             </p>
             <p className="font-body text-xs text-muted-foreground mt-2">
-              Keep this reference — we use it to match your bank transfer to your
-              order.
+              {t("checkout.keepRef")}
             </p>
           </div>
         )}
@@ -182,7 +194,7 @@ export default function Checkout() {
           to="/"
           className="bg-foreground text-background font-body font-semibold px-8 py-3 rounded-full hover:opacity-90 transition-opacity text-sm"
         >
-          BACK TO HOME
+          {t("checkout.backHome")}
         </Link>
       </div>
     );
@@ -192,10 +204,10 @@ export default function Checkout() {
     return (
       <div className="py-32 text-center px-4">
         <p className="font-body text-muted-foreground text-lg mb-4">
-          Your cart is empty.
+          {t("checkout.emptyCart")}
         </p>
         <Link to="/shop" className="font-body text-primary hover:underline">
-          Go to Shop
+          {t("checkout.goToShop")}
         </Link>
       </div>
     );
@@ -203,11 +215,11 @@ export default function Checkout() {
 
   const bankFields = bankDetails
     ? [
-        { label: "Account Name", value: bankDetails.accountName },
-        { label: "Bank Name", value: bankDetails.bankName },
-        { label: "Account Number", value: bankDetails.accountNumber },
-        { label: "IBAN", value: bankDetails.iban },
-        { label: "SWIFT / BIC", value: bankDetails.swiftCode },
+        { label: t("checkout.accountName"), value: bankDetails.accountName },
+        { label: t("checkout.bankName"), value: bankDetails.bankName },
+        { label: t("checkout.accountNumber"), value: bankDetails.accountNumber },
+        { label: t("checkout.iban"), value: bankDetails.iban },
+        { label: t("checkout.swift"), value: bankDetails.swiftCode },
       ].filter((field) => field.value)
     : [];
 
@@ -220,28 +232,26 @@ export default function Checkout() {
             onClick={() => setStep("details")}
             className="inline-flex items-center gap-2 font-body text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" /> Back to Details
+            <ArrowLeft className="w-4 h-4" /> {t("checkout.backToDetails")}
           </button>
         ) : (
           <Link
             to="/cart"
             className="inline-flex items-center gap-2 font-body text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors"
           >
-            <ArrowLeft className="w-4 h-4" /> Back to Cart
+            <ArrowLeft className="w-4 h-4" /> {t("checkout.backToCart")}
           </Link>
         )}
 
         <h1 className="font-heading text-3xl font-black text-foreground mb-2">
-          {step === "details" ? "Checkout" : "Bank Transfer Payment"}
+          {step === "details" ? t("checkout.title") : t("checkout.bankTransfer")}
         </h1>
         {step === "payment" && (
           <p className="font-body text-muted-foreground mb-8">
-            Transfer{" "}
+            {t("checkout.transferInstructions")}{" "}
             <span className="font-semibold text-foreground">
               €{total.toFixed(2)}
-            </span>{" "}
-            to the account below. Use your unique payment reference so we can
-            identify your transfer.
+            </span>
           </p>
         )}
 
@@ -253,7 +263,7 @@ export default function Checkout() {
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label className="font-body text-sm">Full Name *</Label>
+                  <Label className="font-body text-sm">{t("checkout.fullName")}</Label>
                   <Input
                     name="customer_name"
                     value={form.customer_name}
@@ -263,7 +273,7 @@ export default function Checkout() {
                   />
                 </div>
                 <div>
-                  <Label className="font-body text-sm">Email *</Label>
+                  <Label className="font-body text-sm">{t("checkout.email")}</Label>
                   <Input
                     name="customer_email"
                     type="email"
@@ -275,7 +285,7 @@ export default function Checkout() {
                 </div>
               </div>
               <div>
-                <Label className="font-body text-sm">Phone *</Label>
+                <Label className="font-body text-sm">{t("checkout.phone")}</Label>
                 <Input
                   type="number"
                   name="customer_phone"
@@ -286,7 +296,7 @@ export default function Checkout() {
                 />
               </div>
               <div>
-                <Label className="font-body text-sm">Shipping Address *</Label>
+                <Label className="font-body text-sm">{t("checkout.shippingAddress")}</Label>
                 <Input
                   name="shipping_address"
                   value={form.shipping_address}
@@ -297,7 +307,7 @@ export default function Checkout() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <Label className="font-body text-sm">City *</Label>
+                  <Label className="font-body text-sm">{t("checkout.city")}</Label>
                   <Input
                     name="city"
                     value={form.city}
@@ -307,7 +317,7 @@ export default function Checkout() {
                   />
                 </div>
                 <div>
-                  <Label className="font-body text-sm">State</Label>
+                  <Label className="font-body text-sm">{t("checkout.state")}</Label>
                   <Input
                     name="state"
                     value={form.state}
@@ -316,7 +326,7 @@ export default function Checkout() {
                   />
                 </div>
                 <div>
-                  <Label className="font-body text-sm">ZIP Code *</Label>
+                  <Label className="font-body text-sm">{t("checkout.zip")}</Label>
                   <Input
                     name="zip_code"
                     value={form.zip_code}
@@ -327,7 +337,7 @@ export default function Checkout() {
                 </div>
               </div>
               <div>
-                <Label className="font-body text-sm">Order Notes</Label>
+                <Label className="font-body text-sm">{t("checkout.notes")}</Label>
                 <Textarea
                   name="notes"
                   value={form.notes}
@@ -341,7 +351,7 @@ export default function Checkout() {
                 type="submit"
                 className="w-full bg-foreground text-background hover:opacity-90 font-body font-semibold py-6 rounded-full text-sm"
               >
-                CONTINUE TO PAYMENT — €{total.toFixed(2)}
+                {t("checkout.continuePayment")} — €{total.toFixed(2)}
               </Button>
             </form>
           ) : (
@@ -351,21 +361,19 @@ export default function Checkout() {
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="font-body text-xs opacity-80 mb-1">
-                        Payment Reference — include this in your transfer
+                        {t("checkout.paymentRefLabel")}
                       </p>
                       <p className="font-heading text-2xl font-bold tracking-wider">
                         {paymentReference}
                       </p>
                       <p className="font-body text-xs opacity-80 mt-2 max-w-md">
-                        Enter this exact reference in your bank&apos;s payment
-                        description or reference field. This is how we match
-                        your payment to your order.
+                        {t("checkout.paymentRefHint")}
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={() =>
-                        copyToClipboard(paymentReference, "Payment reference")
+                        copyToClipboard(paymentReference, t("checkout.paymentRef"))
                       }
                       className="flex-shrink-0 p-2 rounded-md bg-background/10 hover:bg-background/20 transition-colors"
                       title="Copy payment reference"
@@ -383,10 +391,10 @@ export default function Checkout() {
                   </div>
                   <div>
                     <h2 className="font-body font-bold text-sm">
-                      Bank Account Details
+                      {t("checkout.bankDetails")}
                     </h2>
                     <p className="font-body text-xs text-muted-foreground">
-                      Make a transfer from your bank using the details below
+                      {t("checkout.bankDetailsHint")}
                     </p>
                   </div>
                 </div>
@@ -425,7 +433,7 @@ export default function Checkout() {
 
                     <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
                       <p className="font-body text-xs text-muted-foreground">
-                        Amount to transfer
+                        {t("checkout.amountToTransfer")}
                       </p>
                       <p className="font-heading text-2xl font-bold text-foreground">
                         €{total.toFixed(2)}
@@ -440,17 +448,15 @@ export default function Checkout() {
                   </div>
                 ) : (
                   <p className="font-body text-sm text-muted-foreground text-center py-4">
-                    Bank details are not configured yet. Please contact support.
+                    {t("checkout.bankNotConfigured")}
                   </p>
                 )}
               </div>
 
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
                 <p className="font-body text-sm text-amber-900">
-                  Make sure to include reference{" "}
-                  <span className="font-bold">{paymentReference}</span> when
-                  making your transfer. After completing the payment at your
-                  bank, click the button below to submit your order.
+                  {t("checkout.includeRef")}{" "}
+                  <span className="font-bold">{paymentReference}</span>
                 </p>
               </div>
 
@@ -463,7 +469,7 @@ export default function Checkout() {
                 {isSubmitting ? (
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
                 ) : null}
-                I HAVE MADE THE PAYMENT
+                {t("checkout.confirmPayment")}
               </Button>
             </div>
           )}
@@ -472,7 +478,7 @@ export default function Checkout() {
           <div className="lg:col-span-2">
             <div className="bg-card border border-border rounded-xl p-6 sticky top-28">
               <h3 className="font-body font-bold text-sm mb-4">
-                Order Summary
+                {t("checkout.orderSummary")}
               </h3>
               <div className="space-y-3 mb-4">
                 {items.map((item) => (
@@ -506,7 +512,7 @@ export default function Checkout() {
                 ))}
               </div>
               <div className="border-t border-border pt-4 flex justify-between">
-                <span className="font-body font-bold">Total</span>
+                <span className="font-body font-bold">{t("cart.total")}</span>
                 <span className="font-body font-bold">€{total.toFixed(2)}</span>
               </div>
             </div>

@@ -4,25 +4,26 @@ import { useLocation, useNavigate } from "react-router-dom";
 import ProductCard from "../components/store/ProductCard";
 import { Loader2 } from "lucide-react";
 import { API_URL } from "../lib/api";
+import { useLanguage } from "../context/LanguageContext";
 
-const categories = [
-  { key: "all", label: "All" },
-  { key: "classic", label: "Classic" },
-  { key: "fruity", label: "Fruity" },
-  { key: "chocolatey", label: "Chocolatey" },
-  { key: "nutty", label: "Nutty" },
-  { key: "combo", label: "Bundles" },
+const categoryKeys = [
+  { key: "all", labelKey: "shop.category.all" },
+  { key: "classic", labelKey: "shop.category.classic" },
+  { key: "fruity", labelKey: "shop.category.fruity" },
+  { key: "chocolatey", labelKey: "shop.category.chocolatey" },
+  { key: "nutty", labelKey: "shop.category.nutty" },
+  { key: "combo", labelKey: "shop.category.combo" },
 ];
 
 export default function Shop() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const getCategory = () =>
     new URLSearchParams(location.search).get("category") || "all";
   const [activeCategory, setActiveCategory] = useState(getCategory);
 
-  // Sync when URL changes (e.g. clicking nav links)
   useEffect(() => {
     setActiveCategory(getCategory());
   }, [location.search]);
@@ -34,7 +35,6 @@ export default function Shop() {
     });
   };
 
-  // Fetch products from your API
   const {
     data: response,
     isLoading,
@@ -50,25 +50,27 @@ export default function Shop() {
     },
   });
 
-  // Extract products array from response
   const products = response?.data || [];
 
-  // Map your API categories to the frontend categories
   const filtered = useMemo(() => {
     if (activeCategory === "all") return products;
 
-    // Convert category to lowercase for comparison
     return products.filter(
       (p) => p.category?.toLowerCase() === activeCategory.toLowerCase(),
     );
   }, [products, activeCategory]);
+
+  const pageTitle =
+    activeCategory === "all"
+      ? t("shop.allBreads")
+      : t(categoryKeys.find((c) => c.key === activeCategory)?.labelKey ?? "shop.allBreads");
 
   if (error) {
     return (
       <div className="py-12 px-4 min-h-screen">
         <div className="max-w-7xl mx-auto text-center">
           <p className="text-red-500 font-body">
-            Error loading products: {error.message}
+            {t("shop.errorLoading")} {error.message}
           </p>
         </div>
       </div>
@@ -79,27 +81,8 @@ export default function Shop() {
     <div className="py-12 px-4 min-h-screen">
       <div className="max-w-7xl mx-auto">
         <h1 className="font-heading text-4xl md:text-5xl font-black text-foreground text-center mb-10">
-          {activeCategory === "all"
-            ? "All Breads"
-            : categories.find((c) => c.key === activeCategory)?.label}
+          {pageTitle}
         </h1>
-
-        {/* Category tabs */}
-        {/* <div className="flex flex-wrap justify-center gap-2 md:gap-8 mb-12">
-          {categories.map((cat) => (
-            <button
-              key={cat.key}
-              onClick={() => handleCategoryClick(cat.key)}
-              className={`font-body font-semibold text-sm md:text-base pb-2 px-1 transition-all border-b-2 ${
-                activeCategory === cat.key
-                  ? "text-foreground border-foreground"
-                  : "text-muted-foreground border-transparent hover:text-foreground hover:border-muted-foreground"
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div> */}
 
         {isLoading ? (
           <div className="flex justify-center py-20">
@@ -108,7 +91,7 @@ export default function Shop() {
         ) : filtered.length === 0 ? (
           <div className="text-center py-20">
             <p className="font-body text-muted-foreground text-lg">
-              No products found in this category.
+              {t("shop.noProducts")}
             </p>
           </div>
         ) : (

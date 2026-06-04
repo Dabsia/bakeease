@@ -9,7 +9,7 @@ import {
 } from "../../components/ui/card";
 import { Package, ShoppingCart, DollarSign, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { cos } from "three/src/nodes/math/MathNode.js";
+import { getOrderDeliveryInfo } from "../../lib/orderAddress";
 
 export default function AdminDashboard() {
   const { data: products = [] } = useQuery({
@@ -116,6 +116,9 @@ export default function AdminDashboard() {
                       Customer
                     </th>
                     <th className="font-body text-xs text-muted-foreground text-left pb-3">
+                      Delivery
+                    </th>
+                    <th className="font-body text-xs text-muted-foreground text-left pb-3">
                       Items
                     </th>
                     <th className="font-body text-xs text-muted-foreground text-left pb-3">
@@ -127,13 +130,18 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {orders.slice(0, 10).map((order) => (
+                  {orders.slice(0, 10).map((order) => {
+                    const delivery = getOrderDeliveryInfo(order);
+                    return (
                     <tr
                       key={order._id}
                       className="border-b border-border last:border-none"
                     >
                       <td className="font-body text-sm py-3">
                         {order.firstName} {order.lastName}
+                      </td>
+                      <td className="font-body text-xs py-3 text-muted-foreground max-w-[200px]">
+                        {delivery?.short || delivery?.formatted || "—"}
                       </td>
                       <td className="font-body text-sm py-3 text-muted-foreground">
                         {order.items?.length || 0} items
@@ -155,7 +163,8 @@ export default function AdminDashboard() {
                         </span>
                       </td>
                     </tr>
-                  ))}
+                  );
+                  })}
                 </tbody>
               </table>
             </div>

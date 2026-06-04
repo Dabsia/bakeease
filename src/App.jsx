@@ -1,4 +1,6 @@
 import { Toaster } from "./components/ui/toaster";
+import { Toaster as Sonner } from "sonner";
+import { LanguageProvider } from "./context/LanguageContext";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClientInstance } from "./lib/query-client";
 import {
@@ -130,12 +132,15 @@ const AuthenticatedApp = () => {
 function App() {
   return (
     <AuthProvider>
-      <QueryClientProvider client={queryClientInstance}>
-        <Router>
-          <AuthenticatedApp />
-        </Router>
-        <Toaster />
-      </QueryClientProvider>
+      <LanguageProvider>
+        <QueryClientProvider client={queryClientInstance}>
+          <Router>
+            <AuthenticatedApp />
+          </Router>
+          <Toaster />
+          <Sonner position="top-center" richColors closeButton />
+        </QueryClientProvider>
+      </LanguageProvider>
     </AuthProvider>
   );
 }

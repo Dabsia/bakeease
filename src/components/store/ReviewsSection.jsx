@@ -1,34 +1,25 @@
 import React from "react";
 import { Star } from "lucide-react";
 import { motion } from "framer-motion";
+import { useLanguage } from "../../context/LanguageContext";
 
-const reviews = [
-  {
-    name: "Sarah M.",
-    text: "Absolutely the best banana bread I've ever had! Moist, flavorful, and arrived fresh. Will order again!",
-    rating: 5,
-  },
-  {
-    name: "James T.",
-    text: "The chocolate combo was incredible. My whole family loved it. Perfect gift idea too!",
-    rating: 5,
-  },
-  {
-    name: "Amara K.",
-    text: "You can taste the quality ingredients. This isn't your average banana bread — it's next level.",
-    rating: 5,
-  },
+const reviewKeys = [
+  { name: "Sarah M.", textKey: "reviews.1.text", rating: 5 },
+  { name: "James T.", textKey: "reviews.2.text", rating: 5 },
+  { name: "Amara K.", textKey: "reviews.3.text", rating: 5 },
 ];
 
 export default function ReviewsSection() {
+  const { t } = useLanguage();
+
   return (
     <section className="py-16 md:py-24 px-4 bg-background">
       <div className="max-w-7xl mx-auto text-center">
         <h2 className="font-heading text-3xl md:text-5xl font-black text-foreground mb-12">
-          The Reviews Are In
+          {t("reviews.title")}
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {reviews.map((review, i) => (
+          {reviewKeys.map((review, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 20 }}
@@ -43,7 +34,7 @@ export default function ReviewsSection() {
                 ))}
               </div>
               <p className="font-body text-sm text-muted-foreground mb-4 leading-relaxed">
-                "{review.text}"
+                &ldquo;{t(review.textKey)}&rdquo;
               </p>
               <p className="font-body text-sm font-semibold text-foreground">
                 {review.name}

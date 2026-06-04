@@ -1,5 +1,6 @@
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { useLanguage } from "../../context/LanguageContext";
 
 const policies = {
   refund: {
@@ -99,7 +100,14 @@ const policies = {
   },
 };
 
+const policyTitleKeys = {
+  refund: "footer.refundPolicy",
+  privacy: "footer.privacyPolicy",
+  terms: "footer.termsOfService",
+};
+
 export default function PolicyModals({ open, onClose }) {
+  const { t } = useLanguage();
   if (!open) return null;
   const policy = policies[open];
 
@@ -108,7 +116,7 @@ export default function PolicyModals({ open, onClose }) {
       <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-heading text-xl font-bold">
-            {policy.title}
+            {t(policyTitleKeys[open])}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-5 mt-2">

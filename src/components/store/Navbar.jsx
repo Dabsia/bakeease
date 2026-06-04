@@ -1,17 +1,19 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ShoppingCart, Menu, X, UserCircle } from "lucide-react";
+import { ShoppingCart, Menu, X } from "lucide-react";
 import { useCart } from "../../context/CartContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { Button } from "../ui/button";
-
-const navLinks = [
-  { label: "All Breads", path: "/shop" },
-  { label: "Contact", path: "/contact" },
-  // { label: "Admin Dashboard", path: "/admin" },
-];
+import LanguageSelector from "./LanguageSelector";
 
 export default function Navbar() {
   const { itemCount } = useCart();
+  const { t } = useLanguage();
+
+  const navLinks = [
+    { labelKey: "nav.allBreads", path: "/shop" },
+    { labelKey: "nav.contact", path: "/contact" },
+  ];
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -29,7 +31,7 @@ export default function Navbar() {
           to="/"
           className="font-heading text-xl font-black text-foreground tracking-tight"
         >
-          Tiara's Bread Hub
+          {t("nav.brand")}
         </Link>
 
         {/* Desktop nav */}
@@ -40,7 +42,7 @@ export default function Navbar() {
               onClick={() => handleNavClick(link.path)}
               className="font-body text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
-              {link.label}
+              {t(link.labelKey)}
             </button>
           ))}
           {isLoggedIn && <button
@@ -48,11 +50,12 @@ export default function Navbar() {
               onClick={() => handleNavClick("/admin")}
               className="font-body text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
-              Admin Dashboard
+              {t("nav.adminDashboard")}
             </button>}
         </div>
 
         <div className="flex items-center gap-2">
+          <LanguageSelector className="hidden md:flex" />
           {/* User profile icon */}
           {/* <Link
             to={isLoggedIn ? "/profile" : "/auth"}
@@ -96,15 +99,18 @@ export default function Navbar() {
               onClick={() => handleNavClick(link.path)}
               className="block w-full text-left py-3 font-body font-medium text-sm text-foreground border-b border-border last:border-none"
             >
-              {link.label}
+              {t(link.labelKey)}
             </button>
           ))}
+          <div className="py-3 border-b border-border">
+            <LanguageSelector />
+          </div>
           {isLoggedIn && (
             <button
               onClick={() => handleNavClick("/admin")}
               className="block w-full text-left py-3 font-body font-medium text-sm text-muted-foreground"
             >
-              Admin Dashboard
+              {t("nav.adminDashboard")}
             </button>
           
           )}

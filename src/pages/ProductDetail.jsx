@@ -96,7 +96,7 @@
 //               />
 //             ) : (
 //               <div className="w-full h-full flex items-center justify-center text-muted-foreground font-body">
-//                 No Image
+//                 {t("product.noImage")}
 //               </div>
 //             )}
 //           </div>
@@ -229,11 +229,13 @@ import {
 import { toast } from "sonner";
 import ProductCard from "../components/store/ProductCard";
 import { API_URL } from "../lib/api";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function ProductDetail() {
   const { id } = useParams(); // Better way to get product ID from URL
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
+  const { t } = useLanguage();
 
   // Fetch single product
   const { data: productResponse, isLoading } = useQuery({
@@ -285,13 +287,13 @@ export default function ProductDetail() {
     return (
       <div className="text-center py-32">
         <p className="font-body text-lg text-muted-foreground">
-          Product not found.
+          {t("product.notFound")}
         </p>
         <Link
           to="/shop"
           className="font-body text-primary hover:underline mt-2 inline-block"
         >
-          Back to Shop
+          {t("product.backToShop")}
         </Link>
       </div>
     );
@@ -309,7 +311,7 @@ export default function ProductDetail() {
     };
 
     addItem(cartItem, quantity);
-    toast.success(`${product.name} added to cart!`);
+    toast.success(t("toast.addedToCart"), { duration: 3000 });
   };
 
   // Determine if product is in stock (you may need to add this field to your API)
@@ -322,7 +324,7 @@ export default function ProductDetail() {
           to="/shop"
           className="inline-flex items-center gap-2 font-body text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" /> Back to Shop
+          <ArrowLeft className="w-4 h-4" /> {t("product.backToShop")}
         </Link>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -336,7 +338,7 @@ export default function ProductDetail() {
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-muted-foreground font-body">
-                No Image
+                {t("product.noImage")}
               </div>
             )}
           </div>
@@ -358,7 +360,7 @@ export default function ProductDetail() {
               {/* Optional: Add loaf size if available */}
               {product.loafSize && (
                 <span className="font-body text-sm text-muted-foreground">
-                  ({product.loafSize} size)
+                  ({product.loafSize} {t("product.size")})
                 </span>
               )}
             </div>
@@ -372,7 +374,7 @@ export default function ProductDetail() {
             {product.combo_items && product.combo_items.length > 0 && (
               <div className="mb-6">
                 <h3 className="font-body font-semibold text-sm mb-2">
-                  Includes:
+                  {t("product.includes")}
                 </h3>
                 <ul className="space-y-1">
                   {product.combo_items.map((item, i) => (
@@ -390,7 +392,7 @@ export default function ProductDetail() {
             {product.ingredients && (
               <div className="mb-6">
                 <h3 className="font-body font-semibold text-sm mb-2">
-                  Ingredients:
+                  {t("product.ingredients")}
                 </h3>
                 <p className="font-body text-sm text-muted-foreground">
                   {product.ingredients}
@@ -424,7 +426,7 @@ export default function ProductDetail() {
                 disabled={!inStock}
               >
                 <ShoppingCart className="w-4 h-4 mr-2" />
-                {inStock ? "ADD TO CART" : "OUT OF STOCK"}
+                {inStock ? t("product.addToCart") : t("product.outOfStock")}
               </Button>
             </div>
           </div>
@@ -434,7 +436,7 @@ export default function ProductDetail() {
         {relatedProducts.length > 0 && (
           <div className="mt-20">
             <h2 className="font-heading text-2xl font-bold text-foreground mb-8">
-              You May Also Like
+              {t("product.youMayAlsoLike")}
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {relatedProducts.map((p) => (

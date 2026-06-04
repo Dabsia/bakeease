@@ -2,11 +2,11 @@ import { API_URL } from "./api";
 const STORAGE_KEY = "bakeease_bank_details";
 
 const DEFAULT_BANK_DETAILS = {
-  accountName: import.meta.env.VITE_BANK_ACCOUNT_NAME || "Bake Ease",
-  accountNumber: import.meta.env.VITE_BANK_ACCOUNT_NUMBER || "123554593094",
-  bankName: import.meta.env.VITE_BANK_NAME || "LHV",
-  iban: import.meta.env.VITE_BANK_IBAN || "FI42 1234 5678 9012 3456",
-  swiftCode: import.meta.env.VITE_BANK_SWIFT || "LHVFIHH",
+  accountName: import.meta.env.VITE_BANK_ACCOUNT_NAME,
+  accountNumber: import.meta.env.VITE_BANK_ACCOUNT_NUMBER,
+  bankName: import.meta.env.VITE_BANK_NAME,
+  // iban: import.meta.env.VITE_BANK_IBAN || "FI42 1234 5678 9012 3456",
+  // swiftCode: import.meta.env.VITE_BANK_SWIFT || "LHVFIHH",
   paymentNote:
     import.meta.env.VITE_BANK_PAYMENT_NOTE ||
     "Please include your unique payment reference in the transfer description.",
