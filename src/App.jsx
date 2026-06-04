@@ -37,7 +37,7 @@ import ResetPassword from "./pages/ResetPassword";
 // Admin route wrapper component
 
 const AdminRoute = ({ children }) => {
-  const { isAuthenticated, isLoadingAuth, authChecked, user } = useAuth()
+  const { user } = useAuth()
 
   if (user?.role !== "admin") {
     console.log(
