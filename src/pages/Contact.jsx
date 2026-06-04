@@ -7,6 +7,7 @@ import { Mail, Phone } from "lucide-react";
 import { FaFacebook, FaInstagram } from "react-icons/fa6";
 import { toast } from "sonner";
 import { FaTiktok } from "react-icons/fa";
+import { API_URL } from "../lib/api";
 
 export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
@@ -28,16 +29,13 @@ export default function Contact() {
 
       console.log("Sending email data:", emailData);
 
-      const response = await fetch(
-        "https://bakeease-backend.onrender.com/api/v1/email/send-email",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(emailData),
+      const response = await fetch(`${API_URL}/email/send-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify(emailData),
+      });
 
       const data = await response.json();
       console.log("API Response:", data);

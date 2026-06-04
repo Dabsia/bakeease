@@ -6,8 +6,8 @@ import { Button } from "../ui/button";
 
 const navLinks = [
   { label: "All Breads", path: "/shop" },
-  // { label: "Orders", path: "/orders" },
   { label: "Contact", path: "/contact" },
+  // { label: "Admin Dashboard", path: "/admin" },
 ];
 
 export default function Navbar() {
@@ -43,6 +43,13 @@ export default function Navbar() {
               {link.label}
             </button>
           ))}
+          {isLoggedIn && <button
+              key="admin"
+              onClick={() => handleNavClick("/admin")}
+              className="font-body text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Admin Dashboard
+            </button>}
         </div>
 
         <div className="flex items-center gap-2">
@@ -92,21 +99,15 @@ export default function Navbar() {
               {link.label}
             </button>
           ))}
-          {/* {isLoggedIn ? (
+          {isLoggedIn && (
             <button
-              onClick={() => handleNavClick("/profile")}
+              onClick={() => handleNavClick("/admin")}
               className="block w-full text-left py-3 font-body font-medium text-sm text-muted-foreground"
             >
-              My Profile
+              Admin Dashboard
             </button>
-          ) : (
-            <button
-              onClick={() => handleNavClick("/auth")}
-              className="block w-full text-left py-3 font-body font-medium text-sm text-muted-foreground"
-            >
-              Login/Signup
-            </button>
-          )} */}
+          
+          )}
         </div>
       )}
     </header>

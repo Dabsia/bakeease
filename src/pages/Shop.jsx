@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "react-router-dom";
 import ProductCard from "../components/store/ProductCard";
 import { Loader2 } from "lucide-react";
+import { API_URL } from "../lib/api";
 
 const categories = [
   { key: "all", label: "All" },
@@ -41,10 +42,7 @@ export default function Shop() {
   } = useQuery({
     queryKey: ["products"],
     queryFn: async () => {
-      // const res = await fetch("https://bakeease-backend.onrender.com/api/v1/products");
-      const res = await fetch(
-        "https://bakeease-backend.onrender.com/api/v1/products",
-      );
+      const res = await fetch(`${API_URL}/products`);
       if (!res.ok) {
         throw new Error("Failed to fetch products");
       }

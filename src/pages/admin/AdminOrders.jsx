@@ -24,6 +24,7 @@ import { Loader2, Eye } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { API_URL } from "../../lib/api";
 
 const statusColors = {
   pending: "bg-yellow-100 text-yellow-700",
@@ -36,13 +37,12 @@ const statusColors = {
 export default function AdminOrders() {
   const queryClient = useQueryClient();
   const [selected, setSelected] = useState(null);
-  const API_BASE_URL = "https://bakeease-backend.onrender.com";
 
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ["admin-orders"],
     queryFn: async () => {
       const token = localStorage.getItem("auth_token");
-      const res = await fetch(`${API_BASE_URL}/api/v1/orders`, {
+      const res = await fetch(`${API_URL}/orders`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -55,7 +55,7 @@ export default function AdminOrders() {
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }) => {
       const token = localStorage.getItem("auth_token");
-      const res = await fetch(`${API_BASE_URL}/api/v1/orders/${id}`, {
+      const res = await fetch(`${API_URL}/orders/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -115,6 +115,9 @@ export default function AdminOrders() {
                     {order.created_date
                       ? format(new Date(order.created_date), "MMM d, yyyy")
                       : ""}
+                    {order.paymentReference && (
+                      <> • Ref: {order.paymentReference}</>
+                    )}
                   </p>
                 </div>
                 <Select
@@ -176,6 +179,16 @@ export default function AdminOrders() {
                     {selected.orderStatus}
                   </p>
                 </div>
+                {selected.paymentReference && (
+                  <div className="col-span-2">
+                    <p className="text-muted-foreground text-xs">
+                      Payment Reference
+                    </p>
+                    <p className="font-medium font-mono tracking-wide">
+                      {selected.paymentReference}
+                    </p>
+                  </div>
+                )}
               </div>
               {selected.shipping_address && (
                 <div className="font-body text-sm">
@@ -212,10 +225,10 @@ export default function AdminOrders() {
                   <span>€{selected.total?.toFixed(2)}</span>
                 </div>
               </div>
-              {selected.notes && (
+              {selected.additionalInfo && (
                 <div className="font-body text-sm">
                   <p className="text-muted-foreground text-xs">Notes</p>
-                  <p>{selected.notes}</p>
+                  <p>{selected.additionalInfo}</p>
                 </div>
               )}
             </div>

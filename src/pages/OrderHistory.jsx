@@ -5,7 +5,7 @@ import { ShoppingBag } from "lucide-react";
 import { Card, CardContent } from "../components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 
-const API_URL = "https://bakeease-backend.onrender.com/api/v1";
+import { API_URL } from "../lib/api";
 
 const statusColors = {
   processing: "bg-yellow-100 text-yellow-700",

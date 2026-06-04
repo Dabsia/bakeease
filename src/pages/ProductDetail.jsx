@@ -228,6 +228,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import ProductCard from "../components/store/ProductCard";
+import { API_URL } from "../lib/api";
 
 export default function ProductDetail() {
   const { id } = useParams(); // Better way to get product ID from URL
@@ -238,9 +239,7 @@ export default function ProductDetail() {
   const { data: productResponse, isLoading } = useQuery({
     queryKey: ["product", id],
     queryFn: async () => {
-      const res = await fetch(
-        `https://bakeease-backend.onrender.com/api/v1/products/${id}`,
-      );
+      const res = await fetch(`${API_URL}/products/${id}`);
       if (!res.ok) {
         throw new Error("Failed to fetch product");
       }
@@ -258,9 +257,7 @@ export default function ProductDetail() {
     queryFn: async () => {
       if (!product?.category) return [];
 
-      const res = await fetch(
-        `https://bakeease-backend.onrender.com/api/v1/products`,
-      );
+      const res = await fetch(`${API_URL}/products`);
       if (!res.ok) return [];
 
       const data = await res.json();

@@ -1,7 +1,6 @@
-const API_BASE_URL = "https://bakeease-backend.onrender.com";
-
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
+import { API_URL } from "../../lib/api";
 import {
   Card,
   CardContent,
@@ -17,7 +16,7 @@ export default function AdminDashboard() {
     queryKey: ["admin-products"],
     queryFn: async () => {
       const token = localStorage.getItem("auth_token");
-      const res = await fetch(`${API_BASE_URL}/api/v1/products`, {
+      const res = await fetch(`${API_URL}/products`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to fetch products");
@@ -29,7 +28,7 @@ export default function AdminDashboard() {
     queryKey: ["admin-orders"],
     queryFn: async () => {
       const token = localStorage.getItem("auth_token");
-      const res = await fetch(`${API_BASE_URL}/api/v1/orders`, {
+      const res = await fetch(`${API_URL}/orders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to fetch orders");

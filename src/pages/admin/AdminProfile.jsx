@@ -16,12 +16,13 @@ import {
   LogOut,
   CheckCircle,
   XCircle,
+  Landmark,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "../../lib/AuthContext";
 import { useNavigate } from "react-router-dom";
-
-const API_URL = "https://bakeease-backend.onrender.com/api/v1";
+import { getBankDetails, saveBankDetails } from "../../lib/bankDetails";
+import { API_URL } from "../../lib/api";
 
 export default function AdminProfile() {
   const [loading, setLoading] = useState(true);
@@ -35,6 +36,15 @@ export default function AdminProfile() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [updateStatus, setUpdateStatus] = useState(null); // 'success', 'error', or null
+  const [bankForm, setBankForm] = useState({
+    accountName: "",
+    accountNumber: "",
+    bankName: "",
+    iban: "",
+    swiftCode: "",
+    paymentNote: "",
+  });
+  const [savingBankDetails, setSavingBankDetails] = useState(false);
 
   const { logout, user: authUser } = useAuth();
   const navigate = useNavigate();
@@ -43,7 +53,18 @@ export default function AdminProfile() {
   const user = authUser;
 
   useEffect(() => {
-    setLoading(false);
+    getBankDetails()
+      .then((details) => {
+        setBankForm({
+          accountName: details.accountName || "",
+          accountNumber: details.accountNumber || "",
+          bankName: details.bankName || "",
+          iban: details.iban || "",
+          swiftCode: details.swiftCode || "",
+          paymentNote: details.paymentNote || "",
+        });
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const handleLogout = async () => {
@@ -164,6 +185,27 @@ export default function AdminProfile() {
     }
   };
 
+  const handleBankSave = async (e) => {
+    e.preventDefault();
+
+    if (!bankForm.accountName || !bankForm.bankName || !bankForm.accountNumber) {
+      toast.error("Account name, bank name, and account number are required");
+      return;
+    }
+
+    setSavingBankDetails(true);
+
+    try {
+      const token = localStorage.getItem("auth_token");
+      await saveBankDetails(bankForm, token);
+      toast.success("Bank details updated successfully");
+    } catch (error) {
+      toast.error(error.message || "Failed to save bank details");
+    } finally {
+      setSavingBankDetails(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center py-12">
@@ -218,7 +260,7 @@ export default function AdminProfile() {
         </div>
       )}
 
-      <div className="max-w-md">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl">
         <Card>
           <CardHeader className="flex flex-row items-center gap-4 pb-4">
             <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
@@ -375,6 +417,111 @@ export default function AdminProfile() {
             </form>
           </CardContent>
         </Card>
+
+        {/* <Card>
+          <CardHeader className="flex flex-row items-center gap-4 pb-4">
+            <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
+              <Landmark className="w-6 h-6 text-muted-foreground" />
+            </div>
+            <div>
+              <CardTitle className="font-heading text-lg">
+                Bank Details
+              </CardTitle>
+              <p className="font-body text-xs text-muted-foreground">
+                Shown to customers during checkout for bank transfers
+              </p>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleBankSave} className="space-y-4">
+              <div>
+                <Label className="font-body text-sm">Account Name *</Label>
+                <Input
+                  value={bankForm.accountName}
+                  onChange={(e) =>
+                    setBankForm({ ...bankForm, accountName: e.target.value })
+                  }
+                  placeholder="Account holder name"
+                  required
+                  disabled={savingBankDetails}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label className="font-body text-sm">Bank Name *</Label>
+                <Input
+                  value={bankForm.bankName}
+                  onChange={(e) =>
+                    setBankForm({ ...bankForm, bankName: e.target.value })
+                  }
+                  placeholder="e.g. Swedbank"
+                  required
+                  disabled={savingBankDetails}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label className="font-body text-sm">Account Number *</Label>
+                <Input
+                  value={bankForm.accountNumber}
+                  onChange={(e) =>
+                    setBankForm({ ...bankForm, accountNumber: e.target.value })
+                  }
+                  placeholder="Account number"
+                  required
+                  disabled={savingBankDetails}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label className="font-body text-sm">IBAN</Label>
+                <Input
+                  value={bankForm.iban}
+                  onChange={(e) =>
+                    setBankForm({ ...bankForm, iban: e.target.value })
+                  }
+                  placeholder="EE00 0000 0000 0000 0000"
+                  disabled={savingBankDetails}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label className="font-body text-sm">SWIFT / BIC</Label>
+                <Input
+                  value={bankForm.swiftCode}
+                  onChange={(e) =>
+                    setBankForm({ ...bankForm, swiftCode: e.target.value })
+                  }
+                  placeholder="HABAEE2X"
+                  disabled={savingBankDetails}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label className="font-body text-sm">Payment Note</Label>
+                <Input
+                  value={bankForm.paymentNote}
+                  onChange={(e) =>
+                    setBankForm({ ...bankForm, paymentNote: e.target.value })
+                  }
+                  placeholder="e.g. Use your full name as reference"
+                  disabled={savingBankDetails}
+                  className="mt-1"
+                />
+              </div>
+              <Button
+                type="submit"
+                disabled={savingBankDetails}
+                className="w-full bg-foreground text-background hover:opacity-90 font-body font-semibold"
+              >
+                {savingBankDetails && (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                )}
+                Save Bank Details
+              </Button>
+            </form>
+          </CardContent>
+        </Card> */}
       </div>
     </div>
   );

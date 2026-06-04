@@ -30,8 +30,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "../../lib/AuthContext";
-
-const API_URL = "https://bakeease-backend.onrender.com/api/v1";
+import { API_URL } from "../../lib/api";
 
 const emptyProduct = {
   name: "",
