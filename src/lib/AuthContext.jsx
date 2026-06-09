@@ -27,22 +27,18 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem("auth_token");
       const storedUser = localStorage.getItem("user");
 
-      console.log("Checking auth - token exists:", !!token);
-      console.log("Checking auth - stored user:", storedUser);
-
       if (token && storedUser) {
         const userData = JSON.parse(storedUser);
         setUser(userData);
         setIsAuthenticated(true);
         setAuthError(null);
-        console.log("User restored from localStorage:", userData);
       } else {
         setUser(null);
         setIsAuthenticated(false);
-        console.log("No auth data found in localStorage");
+
       }
     } catch (error) {
-      console.error("Auth check error:", error);
+
       setUser(null);
       setIsAuthenticated(false);
       setAuthError({ type: "network_error", message: error.message });

@@ -16,16 +16,17 @@ import {
   LogOut,
   CheckCircle,
   XCircle,
-  Landmark,
+  Calendar,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "../../lib/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { getBankDetails, saveBankDetails } from "../../lib/bankDetails";
 import { API_URL } from "../../lib/api";
+import { useQuery } from "@tanstack/react-query";
 
 export default function AdminProfile() {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     currentPassword: "",
@@ -35,36 +36,34 @@ export default function AdminProfile() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [updateStatus, setUpdateStatus] = useState(null); // 'success', 'error', or null
-  const [bankForm, setBankForm] = useState({
-    accountName: "",
-    accountNumber: "",
-    bankName: "",
-    iban: "",
-    swiftCode: "",
-    paymentNote: "",
-  });
-  const [savingBankDetails, setSavingBankDetails] = useState(false);
+  const [updateStatus, setUpdateStatus] = useState(null);
+  
+  const [date, setDate] = useState("");
+
+  const today = new Date().toISOString().split("T")[0];
 
   const { logout, user: authUser } = useAuth();
   const navigate = useNavigate();
 
-  // Get user from auth context instead of localStorage
   const user = authUser;
 
   useEffect(() => {
-    getBankDetails()
-      .then((details) => {
-        setBankForm({
-          accountName: details.accountName || "",
-          accountNumber: details.accountNumber || "",
-          bankName: details.bankName || "",
-          iban: details.iban || "",
-          swiftCode: details.swiftCode || "",
-          paymentNote: details.paymentNote || "",
-        });
+    const token = localStorage.getItem("auth_token");
+
+    fetch(`${API_URL}/date`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.data.deliveryDate) {
+          const formatted = new Date(data.data.deliveryDate)
+            .toISOString()
+            .split("T")[0];
+          setDate(formatted);
+          localStorage.setItem("shippingDate", formatted);
+        }
       })
-      .finally(() => setLoading(false));
+      .catch((err) => console.error("Failed to fetch delivery date:", err));
   }, []);
 
   const handleLogout = async () => {
@@ -74,31 +73,24 @@ export default function AdminProfile() {
 
   const handleSave = async (e) => {
     e.preventDefault();
-
-    // Clear previous status
     setUpdateStatus(null);
 
-    // Validation
     if (!form.currentPassword) {
       toast.error("Please enter your current password");
       return;
     }
-
     if (!form.newPassword) {
       toast.error("Please enter a new password");
       return;
     }
-
     if (form.newPassword.length < 6) {
       toast.error("New password must be at least 6 characters");
       return;
     }
-
     if (form.newPassword !== form.confirm_password) {
       toast.error("New passwords do not match");
       return;
     }
-
     if (form.currentPassword === form.newPassword) {
       toast.error("New password must be different from current password");
       return;
@@ -108,8 +100,6 @@ export default function AdminProfile() {
 
     try {
       const token = localStorage.getItem("auth_token");
-
-      console.log("Sending password update request...");
 
       const response = await fetch(`${API_URL}/auth/update-password`, {
         method: "POST",
@@ -123,10 +113,7 @@ export default function AdminProfile() {
         }),
       });
 
-      console.log("Response status:", response.status);
-
       const data = await response.json();
-      console.log("Response data:", data);
 
       if (response.status === 401) {
         setUpdateStatus("error");
@@ -139,70 +126,65 @@ export default function AdminProfile() {
       }
 
       if (!response.ok) {
-        // Handle error response
-        const errorMessage =
-          data.message || data.error || "Failed to update password";
-        throw new Error(errorMessage);
+        throw new Error(data.message || data.error || "Failed to update password");
       }
 
-      // Success - exactly matching your API response
       if (data.message === "Password changed successfully") {
         setUpdateStatus("success");
-
-        // Show success toast
         toast.success(data.message || "Password updated successfully!");
-
-        // Reset form
-        setForm({
-          currentPassword: "",
-          newPassword: "",
-          confirm_password: "",
-        });
-
-        // Clear success status after 5 seconds
-        setTimeout(() => {
-          setUpdateStatus(null);
-        }, 5000);
+        setForm({ currentPassword: "", newPassword: "", confirm_password: "" });
+        setTimeout(() => setUpdateStatus(null), 5000);
       } else {
         throw new Error(data.message || "Failed to update password");
       }
     } catch (error) {
       console.error("Password update error:", error);
       setUpdateStatus("error");
-
-      // Show specific error message
-      const errorMessage =
-        error.message ||
-        "Failed to update password. Please check your current password.";
-      toast.error(errorMessage);
-
-      // Clear error status after 5 seconds
-      setTimeout(() => {
-        setUpdateStatus(null);
-      }, 5000);
+      toast.error(error.message || "Failed to update password. Please check your current password.");
+      setTimeout(() => setUpdateStatus(null), 5000);
     } finally {
       setSaving(false);
     }
   };
 
-  const handleBankSave = async (e) => {
+  const handleUpdatDeliveryDate = async (e) => {
     e.preventDefault();
-
-    if (!bankForm.accountName || !bankForm.bankName || !bankForm.accountNumber) {
-      toast.error("Account name, bank name, and account number are required");
-      return;
-    }
-
-    setSavingBankDetails(true);
-
     try {
       const token = localStorage.getItem("auth_token");
-      await saveBankDetails(bankForm, token);
-      toast.success("Bank details updated successfully");
+
+      const response = await fetch(`${API_URL}/date`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ deliveryDate: date }),
+      });
+
+      const data = await response.json();
+
+      if (response.status === 401) {
+        toast.error("Session expired. Please login again.");
+        setTimeout(() => {
+          logout(true);
+          navigate("/auth");
+        }, 1500);
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || data.error || "Failed to update date");
+      }
+
+      if (data.success) {
+        localStorage.setItem("shippingDate", date);
+        toast.success(data.message || "Delivery date updated successfully!");
+      } else {
+        throw new Error(data.message || "Failed to update delivery date");
+      }
     } catch (error) {
-      toast.error(error.message || "Failed to save bank details");
-    } finally {
-      setSavingBankDetails(false);
+      console.error("Delivery date update error:", error);
+      toast.error(error.message || "Failed to update delivery date.");
     }
   };
 
@@ -214,6 +196,8 @@ export default function AdminProfile() {
     );
   }
 
+
+  
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -230,7 +214,6 @@ export default function AdminProfile() {
         </Button>
       </div>
 
-      {/* Status Banner */}
       {updateStatus === "success" && (
         <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3 animate-in slide-in-from-top-2">
           <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
@@ -403,7 +386,6 @@ export default function AdminProfile() {
                       : "Update Password"}
               </Button>
 
-              {/* Additional feedback text */}
               {updateStatus === "success" && (
                 <p className="text-center text-green-600 text-xs font-body mt-2 animate-in fade-in">
                   Your password has been successfully changed
@@ -418,110 +400,47 @@ export default function AdminProfile() {
           </CardContent>
         </Card>
 
-        {/* <Card>
+        <Card>
           <CardHeader className="flex flex-row items-center gap-4 pb-4">
             <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
-              <Landmark className="w-6 h-6 text-muted-foreground" />
+              <Calendar className="w-6 h-6 text-muted-foreground" />
             </div>
             <div>
               <CardTitle className="font-heading text-lg">
-                Bank Details
+                Delivery Date
               </CardTitle>
               <p className="font-body text-xs text-muted-foreground">
-                Shown to customers during checkout for bank transfers
+                Show Customers the next date for delivery
               </p>
             </div>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleBankSave} className="space-y-4">
+            <form onSubmit={handleUpdatDeliveryDate} className="space-y-4">
+             
               <div>
-                <Label className="font-body text-sm">Account Name *</Label>
+                <Label className="font-body text-sm">
+                  Next Delivery Date *
+                </Label>
                 <Input
-                  value={bankForm.accountName}
-                  onChange={(e) =>
-                    setBankForm({ ...bankForm, accountName: e.target.value })
-                  }
-                  placeholder="Account holder name"
                   required
-                  disabled={savingBankDetails}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label className="font-body text-sm">Bank Name *</Label>
-                <Input
-                  value={bankForm.bankName}
-                  onChange={(e) =>
-                    setBankForm({ ...bankForm, bankName: e.target.value })
-                  }
-                  placeholder="e.g. Swedbank"
-                  required
-                  disabled={savingBankDetails}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label className="font-body text-sm">Account Number *</Label>
-                <Input
-                  value={bankForm.accountNumber}
-                  onChange={(e) =>
-                    setBankForm({ ...bankForm, accountNumber: e.target.value })
-                  }
-                  placeholder="Account number"
-                  required
-                  disabled={savingBankDetails}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label className="font-body text-sm">IBAN</Label>
-                <Input
-                  value={bankForm.iban}
-                  onChange={(e) =>
-                    setBankForm({ ...bankForm, iban: e.target.value })
-                  }
-                  placeholder="EE00 0000 0000 0000 0000"
-                  disabled={savingBankDetails}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label className="font-body text-sm">SWIFT / BIC</Label>
-                <Input
-                  value={bankForm.swiftCode}
-                  onChange={(e) =>
-                    setBankForm({ ...bankForm, swiftCode: e.target.value })
-                  }
-                  placeholder="HABAEE2X"
-                  disabled={savingBankDetails}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label className="font-body text-sm">Payment Note</Label>
-                <Input
-                  value={bankForm.paymentNote}
-                  onChange={(e) =>
-                    setBankForm({ ...bankForm, paymentNote: e.target.value })
-                  }
-                  placeholder="e.g. Use your full name as reference"
-                  disabled={savingBankDetails}
-                  className="mt-1"
+                  type="date"
+                  value={date}
+                  min={today}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="mt-1 outline-none"
                 />
               </div>
               <Button
                 type="submit"
-                disabled={savingBankDetails}
+            
                 className="w-full bg-foreground text-background hover:opacity-90 font-body font-semibold"
               >
-                {savingBankDetails && (
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                )}
-                Save Bank Details
+               
+                Save Next Delivery Date
               </Button>
             </form>
           </CardContent>
-        </Card> */}
+        </Card>
       </div>
     </div>
   );
